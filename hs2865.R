@@ -41,39 +41,6 @@ ggmap(map_usa, extent = "device") +
 
 
 ##########################################
-########### information of China #########
-##########################################
-## getting info of china
-china_master = master_f[master_f$Country == "China", ]
-
-## getting map of china
-map_china <- get_map(location = "china", maptype = "satellite", zoom = 4)
-
-
-## Showing which area had floods in the past
-china_master_heat = data.frame(Centroid.X=as.numeric(china_master$Centroid.X),
-                               Centroid.Y=as.numeric(china_master$Centroid.Y),
-                               Total.floods.M.4=china_master$Total.floods.M.4)
-
-ggmap(map_china, extent = "device") + 
-  geom_point(aes(x=china_master_heat$Centroid.X, 
-                 y=china_master_heat$Centroid.Y),
-             data=china_master_heat, col="red", size=1) +
-  geom_density2d(data=china_master_heat, 
-                 aes(x = china_master_heat$Centroid.X, 
-                     y = china_master_heat$Centroid.Y), 
-                 size = 0.3) + 
-  stat_density2d(data=china_master_heat, 
-                 aes(x = china_master_heat$Centroid.X, 
-                     y = china_master_heat$Centroid.Y, 
-                     fill = ..level.., 
-                     alpha = ..level..), 
-                 size = 0.01, geom = "polygon") + 
-  scale_fill_gradient(low = "green", high = "red") + 
-  scale_alpha(range = c(0, 0.3), guide = FALSE)
-
-
-##########################################
 ########### information of India #########
 ##########################################
 ## getting info of India
@@ -124,9 +91,9 @@ z = data$phi[,,1]
 # Register=4267
 target = master_f[master_f$Register..== 4267, ]
 target = target[1, ]
-begin = as.Date("01-01-1948", format = "%d-%m-%Y")
-flood_begin = difftime(as.Date("27-06-2015", format = "%d-%m-%Y"), begin)
-flood_end = difftime(as.Date("29-06-2015", format = "%d-%m-%Y"), begin)
+begin = as.Date("01-01-1948", format = "%d-%m-%Y")  
+flood_begin = difftime(as.Date("27-06-2015", format = "%d-%m-%Y"), begin)  # you can use target$Began here
+flood_end = difftime(as.Date("29-06-2015", format = "%d-%m-%Y"), begin)  # you can use target$Ended here
 flood_begin = as.numeric(flood_begin)
 flood_end = as.numeric(flood_end)
 tmp_X = floor(as.numeric( target$Centroid.X ))
@@ -139,74 +106,48 @@ tmp_ylat_range = (ylat > tmp_Y - 10) == (ylat < tmp_Y + 10)
 tmp_xlon = xlon[tmp_xlon_range]
 tmp_ylat = ylat[tmp_ylat_range]
 
-tmp_time = data$phi[tmp_xlon_range, tmp_ylat_range, flood_begin:flood_end]  
+tmp_time = data$phi[tmp_xlon_range, tmp_ylat_range, (flood_begin-5):(flood_end+5)]
 
-# for loop for tmp_ylat
-# first day
-for(i in 1 : dim(tmp_ylat)) {
-  if (i == 1) {
-    tmp_X = data.frame(tmp_xlon)
-    tmp_Y = data.frame(rep(tmp_ylat[i], dim(tmp_xlon)))
-    tmp_Z = data.frame(tmp_time[, i, 1])
-  } else {
-    tmp_X = rbind(tmp_X, data.frame(tmp_xlon))
-    tmp_Y = rbind(tmp_Y, data.frame(rep(tmp_ylat[i], dim(tmp_xlon))))
-    tmp_Z = rbind(tmp_Z, data.frame(tmp_time[, i, 1]))
+
+draw_map(target, "usa", tmp_xlon, tmp_ylat, tmp_time, 1)
+draw_map(target, "usa", tmp_xlon, tmp_ylat, tmp_time, 6)
+
+
+draw_map <- function(target, country, tmp_xlon, tmp_ylat, tmp_time, date_point) {
+  for(i in 1 : dim(tmp_ylat)) {
+    if (i == 1) {
+      tmp_X = data.frame(tmp_xlon)
+      tmp_Y = data.frame(rep(tmp_ylat[i], dim(tmp_xlon)))
+      tmp_Z = data.frame(tmp_time[, i, date_point])
+    } else {
+      tmp_X = rbind(tmp_X, data.frame(tmp_xlon))
+      tmp_Y = rbind(tmp_Y, data.frame(rep(tmp_ylat[i], dim(tmp_xlon))))
+      tmp_Z = rbind(tmp_Z, data.frame(tmp_time[, i, date_point]))
+    }
   }
+  colnames(tmp_X) = c("x")
+  colnames(tmp_Y) = c("y")
+  colnames(tmp_Z) = c("z")
+  
+  ## stat_countour
+  map <- get_googlemap(location = country, center=c(as.numeric(target$Centroid.X),
+                                                       as.numeric(target$Centroid.Y)), 
+                            zoom=5)
+  df = data.frame(x=tmp_X$x, 
+                  y=tmp_Y$y,
+                  z=tmp_Z$z)
+  
+  ggmap(map)+
+    geom_tile(data=df, aes(x=tmp_X$x,
+                           y=tmp_Y$y,
+                           fill=tmp_Z$z), alpha=0.2)+
+    scale_fill_gradientn(guide="none",colours=rev(heat.colors(10)))+
+    stat_contour(data=df, aes(x=x, 
+                              y=y, 
+                              z=z, 
+                              color=..level..), geom="path", size=1)+
+    scale_color_gradientn(colours=rev(heat.colors(10))) +
+    geom_point(aes(x=as.numeric(target$Centroid.X), 
+                   y=as.numeric(target$Centroid.Y)),
+               data=target, col="red", size=5) 
 }
-
-map_4267 <- get_googlemap(location = "usa", center=c(as.numeric(target$Centroid.X),
-                                                     as.numeric(target$Centroid.Y)), 
-                          zoom=4)
-ggmap(map_4267, extent = "device") + 
-  stat_density2d(
-    aes(x = tmp_X$tmp_xlon, 
-        y = tmp_Y$rep.tmp_ylat.i...dim.tmp_xlon.., 
-        fill = ..level..),
-    alpha = 0.2,
-    bins = 50,
-    data = data.frame(tmp_Z$tmp_time...i..1.),
-    geom = "polygon") +
-  geom_point(aes(x=as.numeric(target$Centroid.X), 
-                 y=as.numeric(target$Centroid.Y)),
-             data=target, col="red", size=5) 
-
-
-
-
-## stat bin
-tmp_category = cut(tmp_Z$tmp_time...i..1., 10)
-
-ggmap(map_4267, extent = "device") + 
-  stat_bin2d(data=data.frame(tmp_category), 
-             size = 3,
-             alpha = 1/2,
-             aes(x = tmp_X$tmp_xlon, 
-                 y = tmp_Y$rep.tmp_ylat.i...dim.tmp_xlon.., 
-                 colour = tmp_category, 
-                 fill = tmp_category ) ) +
-  geom_point(aes(x=as.numeric(target$Centroid.X), 
-                 y=as.numeric(target$Centroid.Y)),
-             data=target, col="red", size=5) 
-
-## stat_countour
-map_4267 <- get_googlemap(location = "usa", center=c(as.numeric(target$Centroid.X),
-                                                     as.numeric(target$Centroid.Y)), 
-                          zoom=5)
-df = data.frame(x=tmp_X$tmp_xlon, 
-           y=tmp_Y$rep.tmp_ylat.i...dim.tmp_xlon..,
-           z=tmp_Z$tmp_time...i..1.)
-ggmap(map_4267)+
-  geom_tile(data=df, aes(x=tmp_X$tmp_xlon,
-                        y=tmp_Y$rep.tmp_ylat.i...dim.tmp_xlon..,
-                        fill=tmp_Z$tmp_time...i..1.), alpha=0.2)+
-  scale_fill_gradientn(guide="none",colours=rev(heat.colors(10)))+
-  stat_contour(data=df, aes(x=x, 
-                   y=y, 
-                   z=z, 
-                   color=..level..), geom="path", size=1)+
-  scale_color_gradientn(colours=rev(heat.colors(10))) +
-  geom_point(aes(x=as.numeric(target$Centroid.X), 
-                 y=as.numeric(target$Centroid.Y)),
-             data=target, col="red", size=5) 
-
