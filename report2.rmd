@@ -352,6 +352,97 @@ points(floodDay$Centroid.X, floodDay$Centroid.Y, pch = 20, col = "red")
 # TODO 4, Countours of a certain flood within the NOAA data area
 ## Hiro, Phoebe
 
+```{r, include=FALSE}
+xlon = data$X
+ylat = rev(data$Y)
+z = data$phi[,,1]
+
+draw_map <- function(target, country, tmp_xlon, tmp_ylat, tmp_time, date_point, data_title) {
+  for(i in 1 : dim(tmp_ylat)) {
+    if (i == 1) {
+      tmp_X = data.frame(tmp_xlon)
+      tmp_Y = data.frame(rep(tmp_ylat[i], dim(tmp_xlon)))
+      tmp_Z = data.frame(tmp_time[, i, date_point])
+    } else {
+      tmp_X = rbind(tmp_X, data.frame(tmp_xlon))
+      tmp_Y = rbind(tmp_Y, data.frame(rep(tmp_ylat[i], dim(tmp_xlon))))
+      tmp_Z = rbind(tmp_Z, data.frame(tmp_time[, i, date_point]))
+    }
+  }
+  colnames(tmp_X) = c("x")
+  colnames(tmp_Y) = c("y")
+  colnames(tmp_Z) = c("z")
+  
+  map <- get_googlemap(location = country, center=c(as.numeric(target$Centroid.X),
+                                                       as.numeric(target$Centroid.Y)), 
+                            zoom=5)
+  df = data.frame(x=tmp_X$x, 
+                  y=tmp_Y$y,
+                  z=tmp_Z$z)
+  
+  ggmap(map)+
+    geom_tile(data=df, aes(x=x,
+                           y=y,
+                           fill=z), alpha=0.2)+
+    scale_fill_gradientn(guide="none",colours=rev(heat.colors(10)))+
+    stat_contour(data=df, aes(x=x, 
+                              y=y, 
+                              z=z, 
+                              color=..level..), geom="path", size=1)+
+    scale_color_gradientn(colours=rev(heat.colors(10))) +
+    geom_point(aes(x=as.numeric(target$Centroid.X), 
+                   y=as.numeric(target$Centroid.Y)),
+               data=target, col="red", size=5) +
+    ggtitle(data_title)
+}
+
+target = master_f[master_f$Register..== 4267, ]
+target = target[1, ]
+begin = as.Date("01-01-1948", format = "%d-%m-%Y")  
+flood_begin = difftime(as.Date("27-06-2015", format = "%d-%m-%Y"), begin)  
+flood_end = difftime(as.Date("29-06-2015", format = "%d-%m-%Y"), begin)
+flood_begin = as.numeric(flood_begin)
+flood_end = as.numeric(flood_end)
+tmp_X = floor(as.numeric( target$Centroid.X ))
+tmp_Y = floor(as.numeric( target$Centroid.Y ))
+
+xlon = xlon - 180
+tmp_xlon_range = (xlon > tmp_X - 20) == (xlon < tmp_X + 20)
+tmp_ylat_range = (ylat > tmp_Y - 10) == (ylat < tmp_Y + 10)
+tmp_xlon = xlon[tmp_xlon_range]
+tmp_ylat = ylat[tmp_ylat_range]
+tmp_time = data$phi[tmp_xlon_range, tmp_ylat_range, (flood_begin-5):(flood_end+5)]
+```
+
+
+Firstly, we will focus on changes of contours during the flood that happened in the area of Southern Michigan, central Indiana, and western Ohiothe in the US from Jun 27, 2015 to Jun 29, 2015.
+```{r, message=FALSE,warning=FALSE}
+draw_map(target, "usa", tmp_xlon, tmp_ylat, tmp_time, 1, '5 days before the flood happened')
+```
+
+```{r, message=FALSE,warning=FALSE}
+draw_map(target, "usa", tmp_xlon, tmp_ylat, tmp_time, 6, 'First day when the flood happened')
+```
+
+```{r, message=FALSE,warning=FALSE}
+draw_map(target, "usa", tmp_xlon, tmp_ylat, tmp_time, 7, 'Second day when the flood happened')
+```
+
+```{r, message=FALSE,warning=FALSE}
+draw_map(target, "usa", tmp_xlon, tmp_ylat, tmp_time, 8, 'Third day when the flood happened')
+```
+
+```{r, message=FALSE,warning=FALSE}
+draw_map(target, "usa", tmp_xlon, tmp_ylat, tmp_time, 9, 'One day after the flood happened')
+```
+```{r, message=FALSE,warning=FALSE}
+draw_map(target, "usa", tmp_xlon, tmp_ylat, tmp_time, 10, 'Two days day when flood happened')
+```
+```{r, message=FALSE,warning=FALSE}
+draw_map(target, "usa", tmp_xlon, tmp_ylat, tmp_time, 1 + flood_end + 5 - (flood_begin - 5), '5 day after flood happened')
+```
+As seen above, we can see changes of contour when the flood happened. At the second day of the flood, the density of contour is high. 
+
 # TODO 5, PCA
 ## Jordan
 
