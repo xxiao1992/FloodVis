@@ -406,6 +406,7 @@ flood_end = as.numeric(flood_end)
 tmp_X = floor(as.numeric( target$Centroid.X ))
 tmp_Y = floor(as.numeric( target$Centroid.Y ))
 
+xlon = data$X
 xlon = xlon - 180
 tmp_xlon_range = (xlon > tmp_X - 20) == (xlon < tmp_X + 20)
 tmp_ylat_range = (ylat > tmp_Y - 10) == (ylat < tmp_Y + 10)
