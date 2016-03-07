@@ -12,7 +12,7 @@ output: pdf_document
 #      Global Setup        #
 ############################
 
-setwd("C:/Columbia Courses/Visualization/Project2")
+setwd("/Users/MaxTan/Documents/CU_16spring/EDAV/proj2")
 
 
 #############################
