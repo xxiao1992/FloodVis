@@ -52,7 +52,7 @@ library(mapproj)
 library(rgbif)
 
 
-# data manipulation --Tian
+#Data manipulation --Tian
 df = master
 df$Centroid.X <- as.numeric(df$Centroid.X)
 df$Centroid.Y <- as.numeric(df$Centroid.Y)
@@ -61,88 +61,86 @@ class(df$Centroid.X[1])
 df <- df[-which(is.na(df$Centroid.X)),]
 XLon <- as.numeric(df$Centroid.X)
 YLat <- as.numeric(df$Centroid.Y)
-Z <- as.numeric(df$Severity..)
+Severity <- as.numeric(df$Severity..)
+Dead <- as.numeric(df$Dead)
+AffectedRange <- as.numeric(df$Affected.sq.km)
+Magnitude <- as.numeric(df$Magnitude..M...)
 Cause <- df$Main.cause
-#rev(sort(table(Cause)))[1:6]
 n <- length(Cause)
+
+```
+
+We preprocessed data by identifying the top 4 main reasons among these 10 causes based on some key words.
+
+```{r, message=FALSE,warning=FALSE}
+#Classify top five main causes:
 for (i in 1:n){
-  if (grepl('eavy',Cause[i])){Cause[i] <- replace(Cause[i], grepl('eavy',Cause[i]),1) }
-  #1 stands for 'Heavy Rain'
-  else if(grepl('clone',Cause[i])){Cause[i] <- replace(Cause[i], grepl('clone',Cause[i]),2)}
-  #2 stands for'Tropical Cyclone'
-  else if(grepl('onsoon',Cause[i])){Cause[i] <- replace(Cause[i], grepl('onsoon',Cause[i]),3)}
-  #3 stands for 'Monsoon'
-  else if(grepl('orrential',Cause[i])){Cause[i] <- replace(Cause[i], grepl('orrential',Cause[i]),4)}
-  #4 stands for 'Torrential Rain'
-  else {Cause[i] <- replace(Cause[i],TRUE,5)} 
-  #5 stands for 'Other Causes'
+  if (grepl('eavy',Cause[i])){Cause[i] <- replace(Cause[i], grepl('eavy',Cause[i]),'Heavy Rain') }
+  else if(grepl('clone',Cause[i])){Cause[i] <- replace(Cause[i], grepl('clone',Cause[i]),'Tropical Cyclone')}
+  else if(grepl('onsoon',Cause[i])){Cause[i] <- replace(Cause[i], grepl('onsoon',Cause[i]),'Monsoon')}
+  else if(grepl('orrential',Cause[i])){Cause[i] <- replace(Cause[i], grepl('orrential',Cause[i]),'Torrential Rain')}
+  else {Cause[i] <- replace(Cause[i],TRUE,'Other Causes')} 
 }
 
-#Try simple plot of "Main Causes" and "Severity": --Tian
-data(wrld_simpl)
-plot(wrld_simpl)
-points(XLon, YLat, pch = 16, cex = Z/3, col = as.numeric(Cause)+3)
-title(main = "Flood Distribution \nBased on Main Causes and Severity", cex.main =1)
-legend("bottomleft",legend = c("Heavy Rain","Tropical Cyclone","Monsoon","Torrential Rain","Other Causes"),
-       cex = 0.4, pch = 16, col = c(4:8), title ="Main Cause",title.adj = .5)
-legend("bottomright",legend = c("level 1.0","level 1.5","level 2.0"),
-       pt.cex = c(1,1.5,2)/3, cex = .4, pch = 16,col =4, title = "Severity")
-
-#Try ggplot of "Number of Dead People" and "Severity" --Tian
-Dead <- as.numeric(df$Dead)
-df_new <- data.frame(XLon,YLat,Z,Dead)
-
+#Try ggplot of "Number of Dead People" and "Magnitude" --Tian
+df_new1 <- data.frame(XLon,YLat,Magnitude,Dead)
 world <- map_data("world")
 ggplot(world, aes(long, lat)) + 
   geom_polygon(aes(group=group), fill = "White", color ="Dark Blue", size = 0.05) +
-  geom_jitter(data=df_new, aes(XLon, YLat, color = Z, size = Dead/1000), alpha = 0.6) +
+  geom_jitter(data=df_new1, aes(XLon, YLat, color = Magnitude , size = Dead ), alpha = 0.3) +
+  scale_colour_gradientn(colours = rainbow(3, start = 0.17, alpha = 0.2)) +
+  labs(title = "Flood Distribution with\n Number of Dead People and Magnitude", x = "Longgitude", 
+       y = "Latitude", size = " Number of\nDead People", color = "Magnitude")+
+  theme(plot.title = element_text(lineheight=1, face="bold"))+
+  scale_size_continuous(breaks = c(1,100,10000,100000))
+```
+
+From this distribution plot, combining the magnitude and the number of deaths, we can learn that the floods in East Asia and South Asia had both higher magnitude and larger number of deaths. Specifically, in Malaysia and Thailand, there were several highly serious floods, which resulted in over one hundred thousand people losing their lives. Besides, the East US and Europe also had comparatively more floods with lower magnitude. However, in the southeast coast of South America, the floods suffered from higher magnitudes on average.
+
+```{r, message=FALSE,warning=FALSE}
+#Try ggplot of "Number of Dead People" and "Severity" --Tian and Xiyue
+df_new2 <- data.frame(XLon,YLat,Severity,Dead)
+world <- map_data("world")
+ggplot(world, aes(long, lat)) + 
+  geom_polygon(aes(group=group), fill = "White", color ="Dark Blue", size = 0.05) +
+  geom_jitter(data=df_new2, aes(XLon, YLat, color = Severity , size = Dead), alpha = 0.3) +
   scale_colour_gradientn(colours = rainbow(3, start = 0.17, alpha = 0.2)) +
   labs(title = "Flood Distribution with\n Number of Dead People and Severity", x = "Longgitude", 
-       y = "Latitude", size = " Number of\nDead People\n(in thousand)", color = "Severity")+
-  theme(plot.title = element_text(lineheight=1, face="bold"))
-
+       y = "Latitude", size = " Number of\nDead People", color = "Severity")+
+  theme(plot.title = element_text(lineheight=1, face="bold"))+
+  scale_size_continuous(breaks = c(1,100,10000,100000))
 #Try ggplot of "Number of Dead People" and "Severity" another version --Xuyan
 # severity as factor and logarithmic dead
 Dead <- as.numeric(df$Dead)
-df_new <- data.frame(XLon,YLat,Z,Dead)
-
-df_new$Z = as.factor(df_new$Z)
+df_new <- data.frame(XLon,YLat,Severity,Dead)
+df_new$Severity = as.factor(df_new$Severity)
 world <- map_data("world")
 ggplot(world, aes(long, lat)) + 
   geom_polygon(aes(group=group), fill = "White", color ="Dark Blue", size = 0.05) +
-  geom_jitter(data=df_new, aes(XLon, YLat, color = Z, size = log(Dead+10,10)), alpha = 0.6) +
+  geom_jitter(data=df_new, aes(XLon, YLat, color = Severity, size = log(Dead+10,10)), alpha = 0.6) +
   # scale_colour_gradientn(colours = rainbow(3, start = 0.17, alpha = 0.2)) +
   labs(title = "Flood Distribution with\n Number of Dead People and Severity", x = "Longgitude", 
        y = "Latitude", size = " Number of\nDead People\n(in logarithmic)", color = "Severity")+
   theme(plot.title = element_text(lineheight=1, face="bold"))
 
+```
 
+From this distribution plot, combining the severity and the number of deaths, we can see that Europe had the densest floods with high severity. Compared to these, the floods in Asia had higher densities but lower severity. But still, the most serious flood around Malaysia had the most severity and the largest number of deaths at the same time. We also notice that in other places like Russia and Africa, the floods had the lowest severities.
+
+```{r, message=FALSE,warning=FALSE}
 #Try ggplot of "Number of Dead People" and "Main Causes" --Tian
-for (i in 1:n){
-  Cause[i] <- replace(Cause[i], Cause[i]=='1','Heavy Rain') 
-  Cause[i] <- replace(Cause[i], Cause[i]=='2','Tropical Cyclone')
-  Cause[i] <- replace(Cause[i], Cause[i]=='3','Monsoon')
-  Cause[i] <- replace(Cause[i], Cause[i]=='4','Torrential Rain')
-  Cause[i] <- replace(Cause[i], Cause[i]=='5','Other Causes')
-}
-df_new2 <- data.frame(XLon,YLat,Cause,Dead)
+df_new3 <- data.frame(XLon,YLat,Cause,Dead)
 ggplot(world, aes(long, lat)) + 
   geom_polygon(aes(group=group), fill = "White", color ="Dark Blue", size = 0.05) +
-  geom_jitter(data=df_new2, aes(XLon, YLat, color = Cause, size = Dead/1000), alpha = 0.6) +
-  scale_colour_manual(values = c("blue","brown1","black","green","yellow"))+
+  geom_jitter(data=df_new3, aes(XLon, YLat, color = Cause, size = Dead), alpha = 0.3) +
+  scale_colour_manual(values = c("lightskyblue","brown1","black","green","yellow"))+
   labs(title = "Flood Distribution with\n Number of Dead People and Main Causes", x = "Longgitude", 
-       y = "Latitude", size = " Number of\nDead People\n(in thousand)", color = "Main Causes")+ 
-  guides(colour = guide_legend(override.aes = list(size=6)))+
-  theme(plot.title = element_text(lineheight=1, face="bold"))
+       y = "Latitude", size = " Number of\nDead People", color = "Main Causes")+ 
+  guides(colour = guide_legend(override.aes = list(size=4)))+
+  theme(plot.title = element_text(lineheight=1, face="bold"))+
+  scale_size_continuous(breaks = c(1,100,10000,100000))
 
-#Try ggplot of "Number of Dead People" and "Main Causes" --Xuyan
-for (i in 1:n){
-  Cause[i] <- replace(Cause[i], Cause[i]=='1','Heavy Rain') 
-  Cause[i] <- replace(Cause[i], Cause[i]=='2','Tropical Cyclone')
-  Cause[i] <- replace(Cause[i], Cause[i]=='3','Monsoon')
-  Cause[i] <- replace(Cause[i], Cause[i]=='4','Torrential Rain')
-  Cause[i] <- replace(Cause[i], Cause[i]=='5','Other Causes')
-}
+#Try ggplot of "Number of Dead People" and "Main Causes" another version --Xuyan
 df_new2 <- data.frame(XLon,YLat,Cause,Dead)
 ggplot(world, aes(long, lat)) + 
   geom_polygon(aes(group=group), fill = "White", color ="Dark Blue", size = 0.05) +
@@ -154,6 +152,25 @@ ggplot(world, aes(long, lat)) +
   theme(plot.title = element_text(lineheight=1, face="bold"))
 
 ```
+
+This time, we analyze the relationship between the main reasons behind these floods and the number of deaths. From the corresponding distribution plot, the following conclusions can be drawn. Firstly, the most common reason in the whole wide world is Heavy Rain, especially in Africa. Then, we find the floods in India mostly resulted from Monsoon, which seems to be the exclusive reason. Besides, the floods cased by tropical Cyclone were concentrated on the South Asia and South US. The dense floods in Europe were caused by a combination of Heavy Rain, Torrential Rain and other reasons. As for the floods in Russia, the reasons behind them seems to be uncommon, at least compared to other places.
+
+```{r, message=FALSE,warning=FALSE}
+#Try ggplot of "Affected Range(km^2)" and "Severity"  --Tian and Xiyue
+df_new4 <- data.frame(XLon,YLat,AffectedRange,Cause)
+world <- map_data("world")
+ggplot(world, aes(long, lat)) + 
+  geom_polygon(aes(group=group), fill = "White", color ="Dark Blue", size = 0.05) +
+  geom_point(data=df_new4, aes(XLon, YLat, color = Cause, size = AffectedRange/1000), alpha = 0.3) +
+  scale_colour_manual(values = c("lightskyblue","brown1","black","green","yellow"))+
+  labs(title = "Flood Distribution Based on \nMain Causes and Affected Range(km^2)", x = "Longgitude", 
+       y = "Latitude", size = " Affected Range\n(thousand km^2)", color = "Main Causes")+
+  guides(colour = guide_legend(override.aes = list(size=4)))+
+  theme(plot.title = element_text(lineheight=1, face="bold"))+
+  scale_size_continuous(breaks = c(1,10,100,1000,2000,4000))
+```
+
+In the end, we compare the distributions between the main causes and the affected range (square kilometer). From the picture, we can see that the floods in India caused by Monsoon seem to have the one of largest affected scopes. Besides, the causes behinds the intensive floods in South Asia were highly complicated, leading to comparatively small affected ranges with surprise. For example, the most terrible flood in Malaysia that we’ve discussed seems to have an unexpected small range. The situations of East China and East US seem to be similar: large affected ranges and various reasons behind these dense floods. On the top of these coast areas, the floods in Russia mainland also had large affected ranges. 
 
 # TODO 2, more plots on the distribution of countries ie density
 ## Xuyan
