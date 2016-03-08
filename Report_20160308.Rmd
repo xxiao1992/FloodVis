@@ -1,0 +1,622 @@
+---
+title: "report2_final"
+author: "ggMonet"
+date: "March 8, 2016"
+output: pdf_document
+---
+
+# Time Series Plot of Floods 
+
+```{r, message=FALSE,warning=FALSE,echo=FALSE}
+
+
+#############################
+#  Plots about Flood Stats  #
+#############################
+stat = read.csv("GlobalFloodsRecordAnalyses.csv", as.is = TRUE)
+
+# Time series plot of annual floods --Xuyan
+library(ggplot2)
+library(reshape2)
+names(stat) = c("Year","M4 Cumulative", "M6 Cumulative", "M4 Annual", "M6 Annual")
+floodAnnual = melt(stat[-(2:3)], id.vars = "Year", value.name = "Times")
+ggplot(floodAnnual, aes(Year,Times)) + geom_line(aes(color = variable)) + 
+  ggtitle("Annual Flood Time Series Plot")+scale_fill_brewer(palette="Set2")
+```
+
+We can see a greater flucuation in the number of M4 floods than M6 floods, and the occurrences of floods of both degrees are highly correlated. After a view of the distribution of floods in time, we will present the spatial distribution.
+
+# Spatial Distribution of Floods
+
+```{r, message=FALSE,warning=FALSE,echo=FALSE}
+#####################################
+# Plots about Flood Master --Global #
+#####################################
+master = read.csv("GlobalFloodsRecordMaster.csv", as.is = TRUE)
+
+library(fields)
+library(maptools)
+library(ggplot2)
+library(ggmap)
+library(maps)
+library(plyr)
+library(lattice)
+library(Rmisc)
+library(mapproj)
+library(rgbif)
+
+
+#Data manipulation --Tian
+df = master
+df$Centroid.X <- as.numeric(df$Centroid.X)
+df$Centroid.Y <- as.numeric(df$Centroid.Y)
+df$Severity..<- as.numeric(df$Severity..)
+class(df$Centroid.X[1])
+df <- df[-which(is.na(df$Centroid.X)),]
+XLon <- as.numeric(df$Centroid.X)
+YLat <- as.numeric(df$Centroid.Y)
+Severity <- as.numeric(df$Severity..)
+Dead <- as.numeric(df$Dead)
+AffectedRange <- as.numeric(df$Affected.sq.km)
+Magnitude <- as.numeric(df$Magnitude..M...)
+Cause <- df$Main.cause
+n <- length(Cause)
+
+```
+
+We preprocessed data by identifying the top 4 main reasons among these 10 causes based on some key words.
+
+```{r, message=FALSE,warning=FALSE,echo=FALSE}
+#Classify top five main causes:
+for (i in 1:n){
+  if (grepl('eavy',Cause[i])){Cause[i] <- replace(Cause[i], grepl('eavy',Cause[i]),'Heavy Rain') }
+  else if(grepl('clone',Cause[i])){Cause[i] <- replace(Cause[i], grepl('clone',Cause[i]),'Tropical Cyclone')}
+  else if(grepl('onsoon',Cause[i])){Cause[i] <- replace(Cause[i], grepl('onsoon',Cause[i]),'Monsoon')}
+  else if(grepl('orrential',Cause[i])){Cause[i] <- replace(Cause[i], grepl('orrential',Cause[i]),'Torrential Rain')}
+  else {Cause[i] <- replace(Cause[i],TRUE,'Other Causes')} 
+}
+
+#Try ggplot of "Number of Dead People" and "Magnitude" --Tian
+df_new1 <- data.frame(XLon,YLat,Magnitude,Dead)
+world <- map_data("world")
+ggplot(world, aes(long, lat)) + 
+  geom_polygon(aes(group=group), fill = "White", color ="Dark Blue", size = 0.05) +
+  geom_jitter(data=df_new1, aes(XLon, YLat, color = Magnitude , size = Dead ), alpha = 0.3) +
+  scale_colour_gradientn(colours = rainbow(3, start = 0.17, alpha = 0.2)) +
+  labs(title = "Flood Distribution with\n Number of Dead People and Magnitude", x = "Longgitude", 
+       y = "Latitude", size = " Number of\nDead People", color = "Magnitude")+
+  theme(plot.title = element_text(lineheight=1, face="bold"))+
+  scale_size_continuous(breaks = c(1,100,10000,100000))
+```
+
+From this distribution plot, combining the magnitude and the number of deaths, we can learn that the floods in East Asia and South Asia had both higher magnitude and larger number of deaths. Specifically, in Malaysia and Thailand, there were several highly serious floods, which resulted in over one hundred thousand people losing their lives. Besides, the East US and Europe also had comparatively more floods with lower magnitude. However, in the southeast coast of South America, the floods suffered from higher magnitudes on average.
+
+```{r, message=FALSE,warning=FALSE,echo=FALSE}
+#Try ggplot of "Number of Dead People" and "Severity" --Tian and Xiyue
+df_new2 <- data.frame(XLon,YLat,Severity,Dead)
+world <- map_data("world")
+ggplot(world, aes(long, lat)) + 
+  geom_polygon(aes(group=group), fill = "White", color ="Dark Blue", size = 0.05) +
+  geom_jitter(data=df_new2, aes(XLon, YLat, color = Severity , size = Dead), alpha = 0.3) +
+  scale_colour_gradientn(colours = rainbow(3, start = 0.17, alpha = 0.2)) +
+  labs(title = "Flood Distribution with\n Number of Dead People and Severity", x = "Longgitude", 
+       y = "Latitude", size = " Number of\nDead People", color = "Severity")+
+  theme(plot.title = element_text(lineheight=1, face="bold"))+
+  scale_size_continuous(breaks = c(1,100,10000,100000))
+#Try ggplot of "Number of Dead People" and "Severity" another version --Xuyan
+# severity as factor and logarithmic dead
+Dead <- as.numeric(df$Dead)
+df_new <- data.frame(XLon,YLat,Severity,Dead)
+df_new$Severity = as.factor(df_new$Severity)
+world <- map_data("world")
+ggplot(world, aes(long, lat)) + 
+  geom_polygon(aes(group=group), fill = "White", color ="Dark Blue", size = 0.05) +
+  geom_jitter(data=df_new, aes(XLon, YLat, color = Severity, size = log(Dead+10,10)), alpha = 0.6) +
+  # scale_colour_gradientn(colours = rainbow(3, start = 0.17, alpha = 0.2)) +
+  labs(title = "Flood Distribution with\n Number of Dead People and Severity", x = "Longgitude", 
+       y = "Latitude", size = " Number of\nDead People\n(in logarithmic)", color = "Severity")+
+  theme(plot.title = element_text(lineheight=1, face="bold"))
+
+```
+
+From this distribution plot, combining the severity and the number of deaths, we can see that Europe had the densest floods with high severity. Compared to these, the floods in Asia had higher densities but lower severity. But still, the most serious flood around Malaysia had the most severity and the largest number of deaths at the same time. We also notice that in other places like Russia and Africa, the floods had the lowest severities.
+
+```{r, message=FALSE,warning=FALSE,echo=FALSE}
+#Try ggplot of "Number of Dead People" and "Main Causes" --Tian
+df_new3 <- data.frame(XLon,YLat,Cause,Dead)
+ggplot(world, aes(long, lat)) + 
+  geom_polygon(aes(group=group), fill = "White", color ="Dark Blue", size = 0.05) +
+  geom_jitter(data=df_new3, aes(XLon, YLat, color = Cause, size = Dead), alpha = 0.3) +
+  scale_colour_manual(values = c("lightskyblue","brown1","black","green","yellow"))+
+  labs(title = "Flood Distribution with\n Number of Dead People and Main Causes", x = "Longgitude", 
+       y = "Latitude", size = " Number of\nDead People", color = "Main Causes")+ 
+  guides(colour = guide_legend(override.aes = list(size=4)))+
+  theme(plot.title = element_text(lineheight=1, face="bold"))+
+  scale_size_continuous(breaks = c(1,100,10000,100000))
+
+#Try ggplot of "Number of Dead People" and "Main Causes" another version --Xuyan
+df_new2 <- data.frame(XLon,YLat,Cause,Dead)
+ggplot(world, aes(long, lat)) + 
+  geom_polygon(aes(group=group), fill = "White", color ="Dark Blue", size = 0.05) +
+  geom_jitter(data=df_new2, aes(XLon, YLat, color = Cause, size = log(Dead+10,10)), alpha = 0.6) +
+  scale_colour_manual(values = c("blue","brown1","black","green","yellow"))+
+  labs(title = "Flood Distribution with\n Number of Dead People and Main Causes", x = "Longgitude", 
+       y = "Latitude", size = " Number of\nDead People\n(in thousand)", color = "Main Causes")+ 
+  guides(colour = guide_legend(override.aes = list(size=6)))+
+  theme(plot.title = element_text(lineheight=1, face="bold"))
+
+```
+
+This time, we analyze the relationship between the main reasons behind these floods and the number of deaths. From the corresponding distribution plot, the following conclusions can be drawn. Firstly, the most common reason in the whole wide world is Heavy Rain, especially in Africa. Then, we find the floods in India mostly resulted from Monsoon, which seems to be the exclusive reason. Besides, the floods cased by tropical Cyclone were concentrated on the South Asia and South US. The dense floods in Europe were caused by a combination of Heavy Rain, Torrential Rain and other reasons. As for the floods in Russia, the reasons behind them seems to be uncommon, at least compared to other places.
+
+```{r, message=FALSE,warning=FALSE,echo=FALSE}
+#Try ggplot of "Affected Range(km^2)" and "Severity"  --Tian and Xiyue
+df_new4 <- data.frame(XLon,YLat,AffectedRange,Cause)
+world <- map_data("world")
+ggplot(world, aes(long, lat)) + 
+  geom_polygon(aes(group=group), fill = "White", color ="Dark Blue", size = 0.05) +
+  geom_point(data=df_new4, aes(XLon, YLat, color = Cause, size = AffectedRange/1000), alpha = 0.3) +
+  scale_colour_manual(values = c("lightskyblue","brown1","black","green","yellow"))+
+  labs(title = "Flood Distribution Based on \nMain Causes and Affected Range(km^2)", x = "Longgitude", 
+       y = "Latitude", size = " Affected Range\n(thousand km^2)", color = "Main Causes")+
+  guides(colour = guide_legend(override.aes = list(size=4)))+
+  theme(plot.title = element_text(lineheight=1, face="bold"))+
+  scale_size_continuous(breaks = c(1,10,100,1000,2000,4000))
+```
+
+In the end, we compare the distributions between the main causes and the affected range (square kilometer). From the picture, we can see that the floods in India caused by Monsoon seem to have the one of largest affected scopes. Besides, the causes behinds the intensive floods in South Asia were highly complicated, leading to comparatively small affected ranges with surprise. For example, the most terrible flood in Malaysia that we've discussed seems to have an unexpected small range. The situations of East China and East US seem to be similar: large affected ranges and various reasons behind these dense floods. On the top of these coast areas, the floods in Russia mainland also had large affected ranges. 
+
+# Floods in Several Countries
+```{r, message=FALSE,warning=FALSE,echo=FALSE}
+###########################
+#  Reason for Local Plots #
+###########################
+
+# country_cleansing
+library(plyr)
+country = master
+country$Dead = as.numeric(country$Dead)
+country = country[!is.na(country$Dead),]
+
+country$Country = gsub("[?]","",country$Country)
+country$Country = gsub("[/]","",country$Country)
+country$Country = gsub("^ ","",country$Country)
+country$Country = gsub(" $","",country$Country)
+country$Country[country$Country == "USA."] = "USA"
+
+
+library(dplyr)
+library(scales)
+country_group = group_by(country,Country)
+country_summary = summarize(country_group, num = n(), dead = sum(Dead))
+country_summary = as.data.frame(country_summary[order(country_summary$num,decreasing=T),])
+
+ggplot(country_summary[1:10,],aes(reorder(Country,-num),num))+geom_bar(stat = "identity",fill = "#D55E00") + 
+  ylab("Number of Floods") + xlab("Country")
+#List the top3 countries
+
+# heatmap of country + Severity + death
+country_sev = group_by(country,Country,Severity..)
+country_sev_sum = summarize(country_sev, num = n(), dead = sum(Dead))
+names(country_sev_sum)[2] = "severity"
+
+top10 = arrange(country_summary,desc(num))$Country[1:10]
+country_sev_top10 = country_sev_sum[country_sev_sum$Country %in% top10,]
+country_sev_top10 = ddply(as.data.frame(country_sev_top10), .(severity), transform, relativeDeath = rescale(dead))
+
+p = ggplot(country_sev_top10, aes(reorder(Country,-num),severity)) + 
+         geom_tile(aes(fill = relativeDeath), colour = "white") 
+p + scale_fill_gradient(low = "white", high = "#D55E00")+
+  xlab("Country")
+
+```
+
+As we can see, USA, China and India are the top three frequently impacted countries. In the next part, we will have a more detailed look into the distributions of floods happened in the three countries. And from the heatmap of the relative death (rescaled by the most death occurred in a certain severity), we can see that USA did a great job in preventing death in floods while India and Bangladesh did not.
+
+Here, we will describe distribution of floods in USA, China and India. 
+```{r, include=FALSE,echo=FALSE}
+#####################################
+#  Plots about Flood Master --Local #
+#####################################
+# -- Hiro
+
+master_f = data.frame(master)
+
+
+# information of USA
+
+
+## getting info of usa
+usa_master = master_f[master_f$Country == "USA", ]
+
+## getting map of usa
+map_usa <- get_map(location = "usa", maptype = "satellite", zoom = 4)
+
+
+## Showing which area had floods in the past
+usa_master_heat = data.frame(Centroid.X=as.numeric(usa_master$Centroid.X),
+                             Centroid.Y=as.numeric(usa_master$Centroid.Y),
+                             Total.floods.M.4=usa_master$Total.floods.M.4)
+```
+
+
+Firstly, we will draw a case of USA.
+
+```{r, message=FALSE,warning=FALSE,echo=FALSE}
+ggmap(map_usa, extent = "device") + 
+  geom_point(aes(x=usa_master_heat$Centroid.X, 
+                 y=usa_master_heat$Centroid.Y),
+             data=usa_master_heat, col="red", size=1) +
+  geom_density2d(data=usa_master_heat, 
+                 aes(x = usa_master_heat$Centroid.X, 
+                     y = usa_master_heat$Centroid.Y), 
+                 size = 0.3) + 
+  stat_density2d(data=usa_master_heat, 
+                 aes(x = usa_master_heat$Centroid.X, 
+                     y = usa_master_heat$Centroid.Y, 
+                     fill = ..level.., 
+                     alpha = ..level..), 
+                 size = 0.01, geom = "polygon") + 
+  scale_fill_gradient(low = "green", high = "red") + 
+  scale_alpha(range = c(0, 0.3), guide = FALSE)
+```
+
+We draw contours based on where floods happened in the past. At the areas which have red color, they had floods many times. As the color turns green, the numbers of floods occurrence decrease. In the case of USA, floods often happened at coastlands. Also, we can see that floods often happened at the middle east area.
+
+```{r, include=FALSE,echo=FALSE}
+# information of China
+
+## getting info of china
+china_master = master_f[master_f$Country == "China", ]
+
+## getting map of china
+map_china <- get_map(location = "china", maptype = "satellite", zoom = 4)
+
+
+## Showing which area had floods in the past
+china_master_heat = data.frame(Centroid.X=as.numeric(china_master$Centroid.X),
+                               Centroid.Y=as.numeric(china_master$Centroid.Y),
+                               Total.floods.M.4=china_master$Total.floods.M.4)
+```
+
+Secondly, we will draw a case of China.
+
+```{r, message=FALSE,warning=FALSE,echo=FALSE}
+ggmap(map_china, extent = "device") + 
+  geom_point(aes(x=china_master_heat$Centroid.X, 
+                 y=china_master_heat$Centroid.Y),
+             data=china_master_heat, col="red", size=1) +
+  geom_density2d(data=china_master_heat, 
+                 aes(x = china_master_heat$Centroid.X, 
+                     y = china_master_heat$Centroid.Y), 
+                 size = 0.3) + 
+  stat_density2d(data=china_master_heat, 
+                 aes(x = china_master_heat$Centroid.X, 
+                     y = china_master_heat$Centroid.Y, 
+                     fill = ..level.., 
+                     alpha = ..level..), 
+                 size = 0.01, geom = "polygon") + 
+  scale_fill_gradient(low = "green", high = "red") + 
+  scale_alpha(range = c(0, 0.3), guide = FALSE)
+```
+
+In the same way as USA, floods often happened at coastlands in China. We can see that at the area of south east, floods frequently happened.
+
+Thirdly, we will draw a case of India.
+
+```{r, include=FALSE,echo=FALSE}
+# information of India
+
+
+## getting info of India
+india_master = master_f[master_f$Country == "India", ]
+
+## getting map of India
+map_india <- get_map(location = "India", maptype = "satellite", zoom = 4)
+
+## Showing which area had floods in the past
+india_master_heat = data.frame(Centroid.X=as.numeric(india_master$Centroid.X),
+                               Centroid.Y=as.numeric(india_master$Centroid.Y),
+                               Total.floods.M.4=india_master$Total.floods.M.4)
+```
+
+```{r, message=FALSE,warning=FALSE,echo=FALSE}
+ggmap(map_india, extent = "device") + 
+  geom_point(aes(x=india_master_heat$Centroid.X, 
+                 y=india_master_heat$Centroid.Y),
+             data=india_master_heat, col="red", size=1) +
+  geom_density2d(data=india_master_heat, 
+                 aes(x = india_master_heat$Centroid.X, 
+                     y = india_master_heat$Centroid.Y), 
+                 size = 0.3) + 
+  stat_density2d(data=india_master_heat, 
+                 aes(x = india_master_heat$Centroid.X, 
+                     y = india_master_heat$Centroid.Y, 
+                     fill = ..level.., 
+                     alpha = ..level..), 
+                 size = 0.01, geom = "polygon") + 
+  scale_fill_gradient(low = "green", high = "red") + 
+  scale_alpha(range = c(0, 0.3), guide = FALSE)
+```
+
+We can see that floods often happened at coastlands in India, and at east area of India, floods frequently happened as well.
+
+# Pressure Distribution of Days With More than 4 Floods 
+
+We selected several days with the most occurrences of floods and ploted the distribution of the pressure of given area.
+
+```{r, message=FALSE,warning=FALSE,fig.height=3,,echo=FALSE}
+##########################
+#  Plots about NOAA Data #
+##########################
+
+# Read geological data
+
+library(RNetCDF)
+noaa = open.nc('NOAA_Daily_phi_500mb.nc')
+data = read.nc(noaa)
+
+xlon = data$X
+ylat = rev(data$Y)
+# flood data
+# master = read.csv("GlobalFloodsRecordMaster.csv", as.is = TRUE)
+# stat = read.csv("GlobalFloodsRecordAnalyses.csv", as.is = TRUE)
+
+master$Began = as.Date(master$Began,format = "%d-%b-%y")
+master$Ended = as.Date(master$Ended,format = "%d-%b-%y")
+
+master_phi = master[master$Centroid.Y>min(ylat) & master$Centroid.Y<max(ylat),]
+
+# check the distribution of begin dates
+library(dplyr)
+date = data.frame(date = master_phi$Began,cnt = 1)
+group = group_by(date,date)
+summ = summarise(group,cnt = n())
+summ$date[summ$cnt == max(summ$cnt)]
+
+# found that "1998-05-20" and "2002-06-12" is the most
+maxDates = summ$date[summ$cnt == max(summ$cnt)]
+
+
+
+
+# set transparency
+add.alpha = function(COLORS, ALPHA){
+  if(missing(ALPHA)) stop("provide a value for alpha between 0 and 1")
+  RGB = col2rgb(COLORS, alpha=TRUE)
+  RGB[4,] = round(RGB[4,]*ALPHA)
+  NEW.COLORS = rgb(RGB[1,], RGB[2,], RGB[3,], RGB[4,], maxColorValue = 255)
+  return(NEW.COLORS)
+}
+pal = colorRampPalette(c(rgb(0,0,1), rgb(0,1,0), rgb(1,0,0)))
+COLORS = add.alpha(pal(100), 0.6)
+
+
+for(i in 1:length(maxDates)){
+  maxDate = maxDates[i]
+  phi3 = as.numeric(maxDate-as.Date("1948-01-01"))+1
+  z = data$phi[,,phi3]
+
+  # find the data of the floods that day
+  floodDay = master[master$Began==maxDate & is.na(master$Began)==0,]
+  
+  # map data
+  plot(c(min(xlon)-180,max(xlon)-180), c(min(ylat),max(ylat)), type="n", xlab="", ylab="",xaxt='n',yaxt='n',main = as.character(maxDate))
+  map(add=TRUE, fill=TRUE, col="white")
+  image.plot(xlon-180,ylat,z,add=TRUE, col = COLORS, horizontal = T, legend.mar = 3)
+  points(floodDay$Centroid.X, floodDay$Centroid.Y, pch = 20, col = "red")
+}
+
+```
+According to the plots, we can see that many floods occurred in the areas with lower pressure, detailed analysis will be illustrated below.
+
+# Pressure Distribution of Several Floods
+
+```{r, include=FALSE,echo=FALSE}
+xlon = data$X
+ylat = rev(data$Y)
+z = data$phi[,,1]
+
+draw_map <- function(target, country, tmp_xlon, tmp_ylat, tmp_time, date_point, data_title) {
+  for(i in 1 : dim(tmp_ylat)) {
+    if (i == 1) {
+      tmp_X = data.frame(tmp_xlon)
+      tmp_Y = data.frame(rep(tmp_ylat[i], dim(tmp_xlon)))
+      tmp_Z = data.frame(tmp_time[, i, date_point])
+    } else {
+      tmp_X = rbind(tmp_X, data.frame(tmp_xlon))
+      tmp_Y = rbind(tmp_Y, data.frame(rep(tmp_ylat[i], dim(tmp_xlon))))
+      tmp_Z = rbind(tmp_Z, data.frame(tmp_time[, i, date_point]))
+    }
+  }
+  colnames(tmp_X) = c("x")
+  colnames(tmp_Y) = c("y")
+  colnames(tmp_Z) = c("z")
+  
+  map <- get_googlemap(location = country, center=c(as.numeric(target$Centroid.X),
+                                                       as.numeric(target$Centroid.Y)), 
+                            zoom=5)
+  df = data.frame(x=tmp_X$x, 
+                  y=tmp_Y$y,
+                  z=tmp_Z$z)
+  
+  ggmap(map)+
+    geom_tile(data=df, aes(x=x,
+                           y=y,
+                           fill=z), alpha=0.2)+
+    scale_fill_gradientn(guide="none",colours=rev(heat.colors(10)))+
+    stat_contour(data=df, aes(x=x, 
+                              y=y, 
+                              z=z, 
+                              color=..level..), geom="path", size=1)+
+    scale_color_gradientn(colours=rev(heat.colors(10))) +
+    geom_point(aes(x=as.numeric(target$Centroid.X), 
+                   y=as.numeric(target$Centroid.Y)),
+               data=target, col="red", size=5) +
+    ggtitle(data_title)
+}
+
+target = master_f[master_f$Register..== 4267, ]
+target = target[1, ]
+begin = as.Date("01-01-1948", format = "%d-%m-%Y")  
+flood_begin = difftime(as.Date("27-06-2015", format = "%d-%m-%Y"), begin)  
+flood_end = difftime(as.Date("29-06-2015", format = "%d-%m-%Y"), begin)
+flood_begin = as.numeric(flood_begin)
+flood_end = as.numeric(flood_end)
+tmp_X = floor(as.numeric( target$Centroid.X ))
+tmp_Y = floor(as.numeric( target$Centroid.Y ))
+
+xlon = data$X
+xlon = xlon - 180
+tmp_xlon_range = (xlon > tmp_X - 20) == (xlon < tmp_X + 20)
+tmp_ylat_range = (ylat > tmp_Y - 10) == (ylat < tmp_Y + 10)
+tmp_xlon = xlon[tmp_xlon_range]
+tmp_ylat = ylat[tmp_ylat_range]
+tmp_time = data$phi[tmp_xlon_range, tmp_ylat_range, (flood_begin-5):(flood_end+5)]
+```
+
+
+Firstly, we will focus on changes of contours during the flood that happened in the area of Southern Michigan, central Indiana, and western Ohiothe in the US from Jun 27, 2015 to Jun 29, 2015.
+```{r, message=FALSE,warning=FALSE,echo=FALSE}
+draw_map(target, "usa", tmp_xlon, tmp_ylat, tmp_time, 1, '5 days before the flood happened')
+```
+
+This is a contour information of pressures at Jun 22, 2015. We also draw where flood happened by using read dot. At "level" bar on the right of the map, values of contour are written. For example, the area that has deep red has high pressure. We can see that pressures between each area is wide.
+
+```{r, message=FALSE,warning=FALSE,echo=FALSE}
+draw_map(target, "usa", tmp_xlon, tmp_ylat, tmp_time, 6, 'First day of the flood')
+```
+
+This is a contour information of pressures at Jun 27, 2015. As we can see, pressures between each area is narrow, and there are high range of pressures in this area. Also, at the flood point, they had a value of the pressure that was around 5500.
+
+```{r, message=FALSE,warning=FALSE,echo=FALSE}
+draw_map(target, "usa", tmp_xlon, tmp_ylat, tmp_time, 7, 'Second day of the flood')
+```
+
+This is a contour information of pressures at Jun 28, 2015. As we can see, pressures between each area is narrow as well. At the flood point, they had a value of the pressure that was around 5500.
+
+```{r, message=FALSE,warning=FALSE,echo=FALSE}
+draw_map(target, "usa", tmp_xlon, tmp_ylat, tmp_time, 8, 'Third day of the flood')
+```
+
+This is a contour information of pressures at Jun 29, 2015. Pressures between each area becomes wider. At the flood point, they had a value of the pressure that was around 5550.
+
+```{r, message=FALSE,warning=FALSE,echo=FALSE}
+draw_map(target, "usa", tmp_xlon, tmp_ylat, tmp_time, 9, 'One day after the flood happened')
+```
+
+This is a contour information of pressures at Jun 30, 2015. It seems that they had higher pressure value (around 5600) compared with data while flood was happenin.
+
+
+```{r, message=FALSE,warning=FALSE,echo=FALSE}
+draw_map(target, "usa", tmp_xlon, tmp_ylat, tmp_time, 10, 'Two days after the flood happened')
+```
+
+This is a contour information of pressures at July 1, 2015. As same with the previous map,they had higher pressure value (around 5600) compared with data while flood was happenin.
+
+
+# PCA of Pressure Data
+
+```{r, message=FALSE,warning=FALSE,echo=FALSE}
+library(RNetCDF)
+
+# open and read file
+fname<-"NOAA_Daily_phi_500mb.nc"
+fid<-open.nc(fname)
+print.nc(fid)
+data<-read.nc(fid)
+close.nc(fid)
+
+## verify dimensionality of data
+## data$phi is matrix of pressure data organized
+## on three axes: (lon, lat, days since 1/1/1948)
+## e.g. last entry of matrix should be a singular 
+## pressure value:
+head(data$phi[144,15,24873])
+
+## for PCA, need to re-format into N x D matrix s.t.
+## N = days 
+## D = lon x lat coördinate
+## first create columns for D dimension:
+ylat<-data$Y
+xlon<-data$X
+
+#reshape 144 x 15 x 24873 into NxD matrix of 24873x2160
+phi.matrix <- t(matrix(data$phi,2160,24873))
+dim(phi.matrix)
+# > dim(phi.matrix)
+# [1] 24873  2160
+
+# phi.matrix has 24,873 rows of daily pressure data
+# the columns are ordered by lonXlat, and will be 
+# labeled as such in order to easily identify which
+# columns "survive" the PCA. 
+# The labeling convention, 
+# will be as follows: the first columns
+# will be labeled xlon[1]_x_ylat[1], xlon[2]_x_ylat[1],...
+# and the last with xlon[143]_x_ylat[15], xlon[144]_x_ylat[15].
+# Here I will label them to keep track.
+xlon.factor <- as.factor(xlon)
+ylat.factor <- as.factor(ylat)
+a <- expand.grid(xlon.factor,ylat.factor)
+a$coord <- paste(a$Var1,a$Var2,sep="_x_")
+colnames(a)<-c("Lon","Lat","Lon_X_Lat")
+
+colnames(phi.matrix) <- a$Lon_X_Lat
+
+## Focusing on a Location and Time
+# The only way to make PCA both intelligible
+# and computationally feasible, is to focus on a 
+# window of time and a narrow geographic region. 
+# To be consistent with Phoebe and Hiroaki, I will
+# do a PCA over the United States, for the months
+# of June and July, 2015 (days 24624 to 24683)
+# The longitude and latitude will be bounded by:
+
+# Longitude: 230-300 Degrees East
+# Latitude: 25-55 Degrees North
+
+# these regular expressions help identify columsn which 
+# fit the Longitude and Latitude criteria
+allCoords <- as.vector(a$Lon_X_Lat)
+usa.regx.long <- grepl("^230_|^232.5_|^235_|^237.5_|^240_|^242.5_|^245_|^247.5_|^250_|^252.5_|^255_|^257.5_|^260_|^262.5_|^265_|^267.5_|^270_|^272.5_|^275_|^277.5_|^280_|^282.5_|^285_|^287.5_|^290_|^292.5_|^295_|^297.5_|^300_", allCoords)
+usa.regx.lat <- grepl("_25$|_27.5$|_30$|_32.5$|_35$|_37.5$|_40$|_42.5$|_45$|_47.5$|_50$|_52.5$|_55$",allCoords)
+# Multiplying these vectors will yield a vector in which 
+# only "TRUE" fields are within USA's boundaries
+usa.usa <- as.logical(usa.regx.lat*usa.regx.long)
+# Now trim phi.matrix to June-July 2015, USA
+phi.matrix <- phi.matrix[24624:24683,usa.usa]
+dim(phi.matrix)
+```
+
+
+```{r, message=FALSE,warning=FALSE,echo=FALSE}
+# Now we need to center and scale each "grid", so that
+# we can do more stable PCA:
+## log transform
+log.phi <- log(phi.matrix[,1:dim(phi.matrix)[2]])
+
+## apply PCA with CENTERING and SCALING
+phi.pca <- prcomp(log.phi, center = TRUE, scale. = TRUE, tol = .25)
+
+# summary method
+summary(phi.pca)
+```
+```{r, message=FALSE,warning=FALSE,echo=FALSE}
+# plot method
+plot(phi.pca, type = "l")
+
+
+# Try to produce a ggbiplot once PCA is complete
+library(devtools)
+install_github("vqv/ggbiplot")
+
+library(ggbiplot)
+g <- ggbiplot(phi.pca ,obs.scale = 1, var.scale = 1, 
+              ellipse = TRUE, 
+              circle = TRUE,alpha=1)
+g <- g + scale_color_discrete(name = '')
+g <- g + theme(legend.direction = 'horizontal', 
+               legend.position = 'top')
+print(g)
+```
