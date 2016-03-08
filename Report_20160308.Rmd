@@ -206,7 +206,7 @@ country_sev_top10 = ddply(as.data.frame(country_sev_top10), .(severity), transfo
 p = ggplot(country_sev_top10, aes(reorder(Country,-num),severity)) + 
          geom_tile(aes(fill = relativeDeath), colour = "white") 
 p + scale_fill_gradient(low = "white", high = "#D55E00")+
-  xlab("Country")
+  xlab("Country") + theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 ```
 
