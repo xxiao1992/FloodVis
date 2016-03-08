@@ -1,0 +1,97 @@
+library(RNetCDF)
+
+# open and read file
+fname<-"NOAA_Daily_phi_500mb.nc"
+fid<-open.nc(fname)
+print.nc(fid)
+data<-read.nc(fid)
+close.nc(fid)
+
+## verify dimensionality of data
+## data$phi is matrix of pressure data organized
+## on three axes: (lon, lat, days since 1/1/1948)
+## e.g. last entry of matrix should be a singular 
+## pressure value:
+head(data$phi[144,15,24873])
+
+## for PCA, need to re-format into N x D matrix s.t.
+## N = days 
+## D = lon x lat coördinate
+## first create columns for D dimension:
+ylat<-data$Y
+xlon<-data$X
+
+#reshape 144 x 15 x 24873 into NxD matrix of 24873x2160
+phi.matrix <- t(matrix(data$phi,2160,24873))
+dim(phi.matrix)
+# > dim(phi.matrix)
+# [1] 24873  2160
+
+# phi.matrix has 24,873 rows of daily pressure data
+# the columns are ordered by lonXlat, and will be 
+# labeled as such in order to easily identify which
+# columns "survive" the PCA. 
+# The labeling convention, 
+# will be as follows: the first columns
+# will be labeled xlon[1]_x_ylat[1], xlon[2]_x_ylat[1],...
+# and the last with xlon[143]_x_ylat[15], xlon[144]_x_ylat[15].
+# Here I will label them to keep track.
+xlon.factor <- as.factor(xlon)
+ylat.factor <- as.factor(ylat)
+a <- expand.grid(xlon.factor,ylat.factor)
+a$coord <- paste(a$Var1,a$Var2,sep="_x_")
+colnames(a)<-c("Lon","Lat","Lon_X_Lat")
+
+colnames(phi.matrix) <- a$Lon_X_Lat
+
+## Focusing on a Location and Time
+# The only way to make PCA both intelligible
+# and computationally feasible, is to focus on a 
+# window of time and a narrow geographic region. 
+# To be consistent with Phoebe and Hiroaki, I will
+# do a PCA over the United States, for the months
+# of June and July, 2015 (days 24624 to 24683)
+# The longitude and latitude will be bounded by:
+
+# Longitude: 230-300 Degrees East
+# Latitude: 25-55 Degrees North
+
+# these regular expressions help identify columsn which 
+# fit the Longitude and Latitude criteria
+allCoords <- as.vector(a$Lon_X_Lat)
+usa.regx.long <- grepl("^230_|^232.5_|^235_|^237.5_|^240_|^242.5_|^245_|^247.5_|^250_|^252.5_|^255_|^257.5_|^260_|^262.5_|^265_|^267.5_|^270_|^272.5_|^275_|^277.5_|^280_|^282.5_|^285_|^287.5_|^290_|^292.5_|^295_|^297.5_|^300_", allCoords)
+usa.regx.lat <- grepl("_25$|_27.5$|_30$|_32.5$|_35$|_37.5$|_40$|_42.5$|_45$|_47.5$|_50$|_52.5$|_55$",allCoords)
+# Multiplying these vectors will yield a vector in which 
+# only "TRUE" fields are within USA's boundaries
+usa.usa <- as.logical(usa.regx.lat*usa.regx.long)
+# Now trim phi.matrix to June-July 2015, USA
+phi.matrix <- phi.matrix[24624:24683,usa.usa]
+dim(phi.matrix)
+
+# Now we need to center and scale each "grid", so that
+# we can do more stable PCA:
+## log transform
+log.phi <- log(phi.matrix[,1:dim(phi.matrix)[2]])
+
+## apply PCA with CENTERING and SCALING
+phi.pca <- prcomp(log.phi, center = TRUE, scale. = TRUE, tol = .25)
+
+# summary method
+summary(phi.pca)
+
+# plot method
+plot(phi.pca, type = "l")
+
+
+# Try to produce a ggbiplot once PCA is complete
+library(devtools)
+install_github("vqv/ggbiplot")
+
+library(ggbiplot)
+g <- ggbiplot(phi.pca ,obs.scale = 1, var.scale = 1, 
+              ellipse = TRUE, 
+              circle = TRUE,alpha=1)
+g <- g + scale_color_discrete(name = '')
+g <- g + theme(legend.direction = 'horizontal', 
+               legend.position = 'top')
+print(g)
