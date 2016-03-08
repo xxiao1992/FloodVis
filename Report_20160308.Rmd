@@ -9,7 +9,6 @@ output: pdf_document
 
 ```{r, message=FALSE,warning=FALSE,echo=FALSE}
 
-
 #############################
 #  Plots about Flood Stats  #
 #############################
@@ -83,7 +82,7 @@ ggplot(world, aes(long, lat)) +
   geom_polygon(aes(group=group), fill = "White", color ="Dark Blue", size = 0.05) +
   geom_jitter(data=df_new1, aes(XLon, YLat, color = Magnitude , size = Dead ), alpha = 0.3) +
   scale_colour_gradientn(colours = rainbow(3, start = 0.17, alpha = 0.2)) +
-  labs(title = "Flood Distribution with\n Number of Dead People and Magnitude", x = "Longgitude", 
+  labs(title = "Flood Distribution with\n Number of Dead People and Magnitude", x = "Longitude", 
        y = "Latitude", size = " Number of\nDead People", color = "Magnitude")+
   theme(plot.title = element_text(lineheight=1, face="bold"))+
   scale_size_continuous(breaks = c(1,100,10000,100000))
@@ -99,7 +98,7 @@ ggplot(world, aes(long, lat)) +
   geom_polygon(aes(group=group), fill = "White", color ="Dark Blue", size = 0.05) +
   geom_jitter(data=df_new2, aes(XLon, YLat, color = Severity , size = Dead), alpha = 0.3) +
   scale_colour_gradientn(colours = rainbow(3, start = 0.17, alpha = 0.2)) +
-  labs(title = "Flood Distribution with\n Number of Dead People and Severity", x = "Longgitude", 
+  labs(title = "Flood Distribution with\n Number of Dead People and Severity", x = "Longitude", 
        y = "Latitude", size = " Number of\nDead People", color = "Severity")+
   theme(plot.title = element_text(lineheight=1, face="bold"))+
   scale_size_continuous(breaks = c(1,100,10000,100000))
@@ -113,7 +112,7 @@ ggplot(world, aes(long, lat)) +
   geom_polygon(aes(group=group), fill = "White", color ="Dark Blue", size = 0.05) +
   geom_jitter(data=df_new, aes(XLon, YLat, color = Severity, size = log(Dead+10,10)), alpha = 0.6) +
   # scale_colour_gradientn(colours = rainbow(3, start = 0.17, alpha = 0.2)) +
-  labs(title = "Flood Distribution with\n Number of Dead People and Severity", x = "Longgitude", 
+  labs(title = "Flood Distribution with\n Number of Dead People and Severity", x = "Longitude", 
        y = "Latitude", size = " Number of\nDead People\n(in logarithmic)", color = "Severity")+
   theme(plot.title = element_text(lineheight=1, face="bold"))
 
@@ -128,7 +127,7 @@ ggplot(world, aes(long, lat)) +
   geom_polygon(aes(group=group), fill = "White", color ="Dark Blue", size = 0.05) +
   geom_jitter(data=df_new3, aes(XLon, YLat, color = Cause, size = Dead), alpha = 0.3) +
   scale_colour_manual(values = c("lightskyblue","brown1","black","green","yellow"))+
-  labs(title = "Flood Distribution with\n Number of Dead People and Main Causes", x = "Longgitude", 
+  labs(title = "Flood Distribution with\n Number of Dead People and Main Causes", x = "Longitude", 
        y = "Latitude", size = " Number of\nDead People", color = "Main Causes")+ 
   guides(colour = guide_legend(override.aes = list(size=4)))+
   theme(plot.title = element_text(lineheight=1, face="bold"))+
@@ -140,7 +139,7 @@ ggplot(world, aes(long, lat)) +
   geom_polygon(aes(group=group), fill = "White", color ="Dark Blue", size = 0.05) +
   geom_jitter(data=df_new2, aes(XLon, YLat, color = Cause, size = log(Dead+10,10)), alpha = 0.6) +
   scale_colour_manual(values = c("blue","brown1","black","green","yellow"))+
-  labs(title = "Flood Distribution with\n Number of Dead People and Main Causes", x = "Longgitude", 
+  labs(title = "Flood Distribution with\n Number of Dead People and Main Causes", x = "Longitude", 
        y = "Latitude", size = " Number of\nDead People\n(in thousand)", color = "Main Causes")+ 
   guides(colour = guide_legend(override.aes = list(size=6)))+
   theme(plot.title = element_text(lineheight=1, face="bold"))
@@ -157,7 +156,7 @@ ggplot(world, aes(long, lat)) +
   geom_polygon(aes(group=group), fill = "White", color ="Dark Blue", size = 0.05) +
   geom_point(data=df_new4, aes(XLon, YLat, color = Cause, size = AffectedRange/1000), alpha = 0.3) +
   scale_colour_manual(values = c("lightskyblue","brown1","black","green","yellow"))+
-  labs(title = "Flood Distribution Based on \nMain Causes and Affected Range(km^2)", x = "Longgitude", 
+  labs(title = "Flood Distribution Based on \nMain Causes and Affected Range(km^2)", x = "Longitude", 
        y = "Latitude", size = " Affected Range\n(thousand km^2)", color = "Main Causes")+
   guides(colour = guide_legend(override.aes = list(size=4)))+
   theme(plot.title = element_text(lineheight=1, face="bold"))+
@@ -523,7 +522,7 @@ library(RNetCDF)
 # open and read file
 fname<-"NOAA_Daily_phi_500mb.nc"
 fid<-open.nc(fname)
-print.nc(fid)
+#print.nc(fid)
 data<-read.nc(fid)
 close.nc(fid)
 
@@ -532,18 +531,23 @@ close.nc(fid)
 ## on three axes: (lon, lat, days since 1/1/1948)
 ## e.g. last entry of matrix should be a singular 
 ## pressure value:
-head(data$phi[144,15,24873])
+#head(data$phi[144,15,24873])
+```
+In performing PCA on the NOAA data, the pre-processing involved re-formating the data into an N x D matrix,  such that: N = days, and  D = lon x lat coordinates. Specifically, our goal was to do PCA over the USA, during the months of June and July, 2015 (to examine the floods covered in the above section). 
 
+In this case, focusing on a specific location and timeframe was the only way to make PCA both intelligible and computationally feasible. Per the NOAA protocol, time is defined in days since 1/1/1948, so in this case, analyzing June-July 2015 corresponds with days 24624 to 24683. With regards to geography, the longitude and latitude will be bounded by: 230-300 Degrees East, and 25-55 Degrees North, respectively.
+
+```{r, warning=FALSE,echo=FALSE}
 ## for PCA, need to re-format into N x D matrix s.t.
 ## N = days 
-## D = lon x lat coördinate
+## D = lon x lat co?rdinate
 ## first create columns for D dimension:
 ylat<-data$Y
 xlon<-data$X
 
 #reshape 144 x 15 x 24873 into NxD matrix of 24873x2160
 phi.matrix <- t(matrix(data$phi,2160,24873))
-dim(phi.matrix)
+#dim(phi.matrix)
 # > dim(phi.matrix)
 # [1] 24873  2160
 
@@ -586,9 +590,9 @@ usa.regx.lat <- grepl("_25$|_27.5$|_30$|_32.5$|_35$|_37.5$|_40$|_42.5$|_45$|_47.
 usa.usa <- as.logical(usa.regx.lat*usa.regx.long)
 # Now trim phi.matrix to June-July 2015, USA
 phi.matrix <- phi.matrix[24624:24683,usa.usa]
-dim(phi.matrix)
+#dim(phi.matrix)
 ```
-
+Doing the PCA itself involved centering and scaling each "grid" of longXlat data (in order to standardize the PCA). Here is the summary output of the PCA, focusing on the first 10 Principal Components:
 
 ```{r, message=FALSE,warning=FALSE,echo=FALSE}
 # Now we need to center and scale each "grid", so that
@@ -602,11 +606,18 @@ phi.pca <- prcomp(log.phi, center = TRUE, scale. = TRUE, tol = .25)
 # summary method
 summary(phi.pca)
 ```
+
+This is a Scree Plot showing the relative importance of the first 10 PCs.
+
 ```{r, message=FALSE,warning=FALSE,echo=FALSE}
 # plot method
-plot(phi.pca, type = "l")
+plot(phi.pca, type = "l", main = 'PCA Scree Plot')
 
+```
 
+Finally, we used the ggbiplot package to build an interesting, though dense, biplot of the PCA data.
+
+```{r, echo=FALSE,warning=FALSE}
 # Try to produce a ggbiplot once PCA is complete
 library(devtools)
 install_github("vqv/ggbiplot")
@@ -620,3 +631,5 @@ g <- g + theme(legend.direction = 'horizontal',
                legend.position = 'top')
 print(g)
 ```
+
+

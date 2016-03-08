@@ -519,6 +519,65 @@ draw_map(target, "usa", tmp_xlon, tmp_ylat, tmp_time, 10, 'Two days after the fl
 
 This is a contour information of pressures at July 1, 2015. As same with the previous map,they had higher pressure value (around 5600) compared with data while flood was happenin.
 
+```{r, message=FALSE,warning=FALSE}
+target = master_f[master_f$Register..== 4266, ]
+target = target[1, ]
+begin = as.Date("01-01-1948", format = "%d-%m-%Y")  
+flood_begin = difftime(as.Date("25-06-2015", format = "%d-%m-%Y"), begin) 
+flood_end = difftime(as.Date("29-06-2015", format = "%d-%m-%Y"), begin)
+flood_begin = as.numeric(flood_begin)
+flood_end = as.numeric(flood_end)
+tmp_X = floor(as.numeric( target$Centroid.X ))
+tmp_Y = floor(as.numeric( target$Centroid.Y ))
+
+xlon = data$X
+xlon = xlon - 180
+tmp_xlon_range = (xlon > tmp_X - 20) == (xlon < tmp_X + 20)
+tmp_ylat_range = (ylat > tmp_Y - 10) == (ylat < tmp_Y + 10)
+tmp_xlon = xlon[tmp_xlon_range]
+tmp_ylat = ylat[tmp_ylat_range]
+tmp_time = data$phi[tmp_xlon_range, tmp_ylat_range, (flood_begin-5):(flood_end+5)]
+
+draw_map(target, "russia", tmp_xlon, tmp_ylat, tmp_time, 1, '5 days before the flood happened')
+draw_map(target, "russia", tmp_xlon, tmp_ylat, tmp_time, 6, 'The day the flood happened')
+draw_map(target, "russia", tmp_xlon, tmp_ylat, tmp_time, 7, 'The day after the flood started')
+draw_map(target, "russia", tmp_xlon, tmp_ylat, tmp_time, 8, 'The second day after the flood started')
+draw_map(target, "russia", tmp_xlon, tmp_ylat, tmp_time, 9, 'The third day after the flood started')
+draw_map(target, "russia", tmp_xlon, tmp_ylat, tmp_time, 10, 'The fourth day after the flood started')
+draw_map(target, "russia", tmp_xlon, tmp_ylat, tmp_time, 1 + flood_end + 5 - (flood_begin - 5), 'The fifth day after flood happened')
+```
+Despite the different latitude and longitude, the flood in USA and Russia still share some same characters. For example, on five days before the flood happen, the pressure around the flood area has been increase to the similar level to the the level when the flood happened.  Among the flood area, after the flood started, the pressure level kept decreased. Also, around the third day after the flood started, in both locations, the pressure had been significantly decreased and, by looking at the width between the contour lines around the flooded area, we can also notice that the decrease in pressure   have been significantly. However, if we looked at the contour about the pressure level 5 days after the flood ended, we can notice that interestingly, the pressure level increased a little bit, especially in USA, the pressure level was even higher than that before the flood happened. 
+
+
+```{r, message=FALSE,warning=FALSE}
+target = master_f[master_f$Register..== 4258, ]
+target = target[1, ]
+begin = as.Date("01-01-1948", format = "%d-%m-%Y")  
+flood_begin = difftime(as.Date("15-05-2015", format = "%d-%m-%Y"), begin) 
+flood_end = difftime(as.Date("02-06-2015", format = "%d-%m-%Y"), begin)
+flood_begin = as.numeric(flood_begin)
+flood_end = as.numeric(flood_end)
+tmp_X = floor(as.numeric( target$Centroid.X ))
+tmp_Y = floor(as.numeric( target$Centroid.Y ))
+
+xlon = data$X
+xlon = xlon - 180
+tmp_xlon_range = (xlon > tmp_X - 20) == (xlon < tmp_X + 20)
+tmp_ylat_range = (ylat > tmp_Y - 10) == (ylat < tmp_Y + 10)
+tmp_xlon = xlon[tmp_xlon_range]
+tmp_ylat = ylat[tmp_ylat_range]
+tmp_time = data$phi[tmp_xlon_range, tmp_ylat_range, (flood_begin-5):(flood_end+5)]
+
+draw_map(target, "russia", tmp_xlon, tmp_ylat, tmp_time, 1, '5 days before the flood happened')
+draw_map(target, "russia", tmp_xlon, tmp_ylat, tmp_time, 6, 'The day the flood happened')
+draw_map(target, "russia", tmp_xlon, tmp_ylat, tmp_time, 7, 'The day after the flood started')
+draw_map(target, "russia", tmp_xlon, tmp_ylat, tmp_time, 8, 'The second day after the flood started')
+draw_map(target, "russia", tmp_xlon, tmp_ylat, tmp_time, 9, 'The third day after the flood started')
+draw_map(target, "russia", tmp_xlon, tmp_ylat, tmp_time, 10, 'The fourth day the flood started')
+draw_map(target, "russia", tmp_xlon, tmp_ylat, tmp_time, 1 + flood_end + 5 - (flood_begin - 5), 'The fifth day after flood happened')
+```
+The flood we compared above both last around 5 days, so we decide to look at some other flood, which last much longer to see if there is significant different changes in the pressure level. The following contours is about a 2-week flood in Russia. Compared to the previous flood in Russia we analyzed above, this long-last flood still shares some same characters. For example, on the fifth day before the flood happened, the pressure level had been very close to the peak level during the flood. The pressure kept decreased after the flood started and on the fifth day after the flood ended, the pressure level increase again. The major difference between the pressure level during these two flood is that for the longer flood, the decrease in the pressure per day is less significant, which make sense since the flood was still in the early stage and took longer to end. 
+
 
 # TODO 5, PCA
 ## Jordan
