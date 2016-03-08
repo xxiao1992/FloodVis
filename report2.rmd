@@ -220,7 +220,8 @@ p + scale_fill_gradient(low = "white", high = "#D55E00")+
 
 As we can see, USA, China and India are the top three frequently impacted countries. In the next part, we will have a more detailed look into the distributions of floods happened in the three countries. And from the heatmap of the relative death (rescaled by the most death occurred in a certain severity), we can see that USA did a great job in preventing death in floods while India and Bangladesh did not.
 
-```{r, message=FALSE,warning=FALSE}
+Here, we will describe distribution of floods in USA, China and India. 
+```{r, include=FALSE}
 #####################################
 #  Plots about Flood Master --Local #
 #####################################
@@ -243,7 +244,11 @@ map_usa <- get_map(location = "usa", maptype = "satellite", zoom = 4)
 usa_master_heat = data.frame(Centroid.X=as.numeric(usa_master$Centroid.X),
                              Centroid.Y=as.numeric(usa_master$Centroid.Y),
                              Total.floods.M.4=usa_master$Total.floods.M.4)
+```
 
+
+Firstly, we will draw a case of USA.
+```{r, message=FALSE,warning=FALSE}
 ggmap(map_usa, extent = "device") + 
   geom_point(aes(x=usa_master_heat$Centroid.X, 
                  y=usa_master_heat$Centroid.Y),
@@ -260,7 +265,11 @@ ggmap(map_usa, extent = "device") +
                  size = 0.01, geom = "polygon") + 
   scale_fill_gradient(low = "green", high = "red") + 
   scale_alpha(range = c(0, 0.3), guide = FALSE)
+```
 
+We draw contours based on where floods happened in the past. At the areas which have red color, they had floods many times. As the color turns green, the numbers of floods occurrence decrease. In the case of USA, floods often happened at coastlands. Also, we can see that floods often happened at the middle east area.
+
+```{r, include=FALSE}
 # information of China
 
 ## getting info of china
@@ -274,7 +283,10 @@ map_china <- get_map(location = "china", maptype = "satellite", zoom = 4)
 china_master_heat = data.frame(Centroid.X=as.numeric(china_master$Centroid.X),
                                Centroid.Y=as.numeric(china_master$Centroid.Y),
                                Total.floods.M.4=china_master$Total.floods.M.4)
+```
 
+Secondly, we will draw a case of China.
+```{r, message=FALSE,warning=FALSE}
 ggmap(map_china, extent = "device") + 
   geom_point(aes(x=china_master_heat$Centroid.X, 
                  y=china_master_heat$Centroid.Y),
@@ -291,8 +303,12 @@ ggmap(map_china, extent = "device") +
                  size = 0.01, geom = "polygon") + 
   scale_fill_gradient(low = "green", high = "red") + 
   scale_alpha(range = c(0, 0.3), guide = FALSE)
+```
 
+In the same way as USA, floods often happened at coastlands in China. We can see that at the area of south east, floods frequently happened.
 
+Thirdly, we will draw a case of India.
+```{r, include=FALSE}
 # information of India
 
 
@@ -306,7 +322,9 @@ map_india <- get_map(location = "India", maptype = "satellite", zoom = 4)
 india_master_heat = data.frame(Centroid.X=as.numeric(india_master$Centroid.X),
                                Centroid.Y=as.numeric(india_master$Centroid.Y),
                                Total.floods.M.4=india_master$Total.floods.M.4)
+```
 
+```{r, message=FALSE,warning=FALSE}
 ggmap(map_india, extent = "device") + 
   geom_point(aes(x=india_master_heat$Centroid.X, 
                  y=india_master_heat$Centroid.Y),
@@ -324,6 +342,9 @@ ggmap(map_india, extent = "device") +
   scale_fill_gradient(low = "green", high = "red") + 
   scale_alpha(range = c(0, 0.3), guide = FALSE)
 ```
+
+We can see that floods often happened at coastlands in India, and at east area of India, floods frequently happened as well.
+
 
 # TODO 3, plots of some days with a several occurrences and the pressure data
 ## Xuyan
