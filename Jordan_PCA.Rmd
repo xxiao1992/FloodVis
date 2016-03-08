@@ -2,7 +2,7 @@
 title: "Jordan_PCA"
 author: "Jordan Chazin"
 date: "March 8, 2016"
-output: html_document
+output: pdf_document
 ---
 
 
