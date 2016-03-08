@@ -486,28 +486,39 @@ Firstly, we will focus on changes of contours during the flood that happened in 
 draw_map(target, "usa", tmp_xlon, tmp_ylat, tmp_time, 1, '5 days before the flood happened')
 ```
 
-```{r, message=FALSE,warning=FALSE}
-draw_map(target, "usa", tmp_xlon, tmp_ylat, tmp_time, 6, 'First day when the flood happened')
-```
+This is a contour information of pressures at Jun 22, 2015. We also draw where flood happened by using read dot. At "level" bar on the right of the map, values of contour are written. For example, the area that has deep red has high pressure. We can see that pressures between each area is wide.
 
 ```{r, message=FALSE,warning=FALSE}
-draw_map(target, "usa", tmp_xlon, tmp_ylat, tmp_time, 7, 'Second day when the flood happened')
+draw_map(target, "usa", tmp_xlon, tmp_ylat, tmp_time, 6, 'First day of the flood')
 ```
 
+This is a contour information of pressures at Jun 27, 2015. As we can see, pressures between each area is narrow, and there are high range of pressures in this area. Also, at the flood point, they had a value of the pressure that was around 5500.
+
 ```{r, message=FALSE,warning=FALSE}
-draw_map(target, "usa", tmp_xlon, tmp_ylat, tmp_time, 8, 'Third day when the flood happened')
+draw_map(target, "usa", tmp_xlon, tmp_ylat, tmp_time, 7, 'Second day of the flood')
 ```
+
+This is a contour information of pressures at Jun 28, 2015. As we can see, pressures between each area is narrow as well. At the flood point, they had a value of the pressure that was around 5500.
+
+```{r, message=FALSE,warning=FALSE}
+draw_map(target, "usa", tmp_xlon, tmp_ylat, tmp_time, 8, 'Third day of the flood')
+```
+
+This is a contour information of pressures at Jun 29, 2015. Pressures between each area becomes wider. At the flood point, they had a value of the pressure that was around 5550.
 
 ```{r, message=FALSE,warning=FALSE}
 draw_map(target, "usa", tmp_xlon, tmp_ylat, tmp_time, 9, 'One day after the flood happened')
 ```
+
+This is a contour information of pressures at Jun 30, 2015. It seems that they had higher pressure value (around 5600) compared with data while flood was happenin.
+
+
 ```{r, message=FALSE,warning=FALSE}
-draw_map(target, "usa", tmp_xlon, tmp_ylat, tmp_time, 10, 'Two days day when flood happened')
+draw_map(target, "usa", tmp_xlon, tmp_ylat, tmp_time, 10, 'Two days after the flood happened')
 ```
-```{r, message=FALSE,warning=FALSE}
-draw_map(target, "usa", tmp_xlon, tmp_ylat, tmp_time, 1 + flood_end + 5 - (flood_begin - 5), '5 day after flood happened')
-```
-As seen above, we can see changes of contour when the flood happened. At the second day of the flood, the density of contour is high. 
+
+This is a contour information of pressures at July 1, 2015. As same with the previous map,they had higher pressure value (around 5600) compared with data while flood was happenin.
+
 
 # TODO 5, PCA
 ## Jordan
