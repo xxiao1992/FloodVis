@@ -50,7 +50,6 @@ df = master
 df$Centroid.X <- as.numeric(df$Centroid.X)
 df$Centroid.Y <- as.numeric(df$Centroid.Y)
 df$Severity..<- as.numeric(df$Severity..)
-class(df$Centroid.X[1])
 df <- df[-which(is.na(df$Centroid.X)),]
 XLon <- as.numeric(df$Centroid.X)
 YLat <- as.numeric(df$Centroid.Y)
