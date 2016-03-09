@@ -23,7 +23,7 @@ ggplot(floodAnnual, aes(Year,Times)) + geom_line(aes(color = variable)) +
   ggtitle("Annual Flood Time Series Plot")+scale_fill_brewer(palette="Set2")
 ```
 
-We can see a greater flucuation in the number of M4 floods than M6 floods, and the occurrences of floods of both degrees are highly correlated. After a view of the distribution of floods in time, we will present the spatial distribution.
+We can see a greater fluctuation in the number of M4 floods than M6 floods, and the occurrences of floods of both degrees are highly correlated. After a view of the distribution of floods in time, we will present the spatial distribution.
 
 # Spatial Distribution of Floods
 
