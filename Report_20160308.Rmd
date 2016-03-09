@@ -1,6 +1,6 @@
 ---
-title: "report2_final"
-author: "ggMonet"
+title: "Flood Distribution and The Impact of Atmosphere Pressure"
+author: "Art of Ark"
 date: "March 8, 2016"
 output: pdf_document
 ---
@@ -23,7 +23,7 @@ ggplot(floodAnnual, aes(Year,Times)) + geom_line(aes(color = variable)) +
   ggtitle("Annual Flood Time Series Plot")+scale_fill_brewer(palette="Set2")
 ```
 
-We can see a greater fluctuation in the number of M4 floods than M6 floods, and the occurrences of floods of both degrees are highly correlated. After a view of the distribution of floods in time, we will present the spatial distribution.
+We can see a greater flucuation in the number of M4 floods than M6 floods, and the occurrences of floods of both degrees are highly correlated. After a view of the distribution of floods in time, we will present the spatial distribution.
 
 # Spatial Distribution of Floods
 
@@ -97,9 +97,9 @@ df_new$Severity = as.factor(df_new$Severity)
 world <- map_data("world")
 ggplot(world, aes(long, lat)) + 
   geom_polygon(aes(group=group), fill = "White", color ="Dark Blue", size = 0.05) +
-  geom_jitter(data=df_new, aes(XLon, YLat, color = Severity, size = log(Dead+10,10)), alpha = 0.6) +
+  geom_jitter(data=df_new, aes(XLon, YLat, color = Severity, size = log(Dead+10,10)), alpha = 0.33) +
   scale_size(range = c(0,4))+
-  scale_colour_manual(values = c("green","blue","red"))+
+  scale_colour_manual(values = c("yellow2","blue","red"))+
   labs(title = "Flood Distribution with\n Number of Dead People and Severity", x = "Longitude", 
        y = "Latitude", size = " Number of\nDead People\n(in logarithm\nbase 10)", color = "Severity")+
   guides(colour = guide_legend(override.aes = list(size=6)))+
@@ -114,7 +114,7 @@ From this distribution plot, combining the severity and the number of deaths, we
 df_new2 <- data.frame(XLon,YLat,Cause,Dead)
 ggplot(world, aes(long, lat)) + 
   geom_polygon(aes(group=group), fill = "White", color ="Dark Blue", size = 0.05) +
-  geom_jitter(data=df_new2, aes(XLon, YLat, color = Cause, size = log(Dead+10,10)), alpha = 0.6) +
+  geom_jitter(data=df_new2, aes(XLon, YLat, color = Cause, size = log(Dead+10,10)), alpha = 0.33) +
   scale_size(range = c(0,4)) +
   scale_colour_manual(values = c("blue","brown1","black","green","yellow"))+
   labs(title = "Flood Distribution with\n Number of Dead People and Main Causes", x = "Longitude", 
@@ -132,7 +132,7 @@ df_new4 <- data.frame(XLon,YLat,AffectedRange,Cause)
 world <- map_data("world")
 ggplot(world, aes(long, lat)) + 
   geom_polygon(aes(group=group), fill = "White", color ="Dark Blue", size = 0.05) +
-  geom_point(data=df_new4, aes(XLon, YLat, color = Cause, size = AffectedRange/1000), alpha = 0.6) +
+  geom_point(data=df_new4, aes(XLon, YLat, color = Cause, size = AffectedRange/1000), alpha = 0.33) +
    scale_size(range = c(0,4)) +
   scale_colour_manual(values = c("blue","brown1","black","green","yellow"))+
   labs(title = "Flood Distribution Based on \nMain Causes and Affected Range(square km)", x = "Longitude", 
@@ -571,7 +571,7 @@ close.nc(fid)
 ## pressure value:
 #head(data$phi[144,15,24873])
 ```
-In performing PCA on the NOAA data, the pre-processing involved re-formating the data into an N x D matrix,  such that: N = days, and  D = lon x lat coordinates. Specifically, our goal was to do PCA over the USA, during the months of June and July, 2015 (to examine some of the floods covered in the above section). 
+In performing PCA on the NOAA data, the pre-processing involved re-formating the data into an N x D matrix,  such that: N = days, and  D = lon x lat coordinates. Specifically, our goal was to do PCA over the USA, during the months of June and July, 2015 (to examine the floods covered in the above section). 
 
 In this case, focusing on a specific location and timeframe was the only way to make PCA both intelligible and computationally feasible. Per the NOAA protocol, time is defined in days since 1/1/1948, so in this case, analyzing June-July 2015 corresponds with days 24624 to 24683. With regards to geography, the longitude and latitude will be bounded by: 230-300 Degrees East, and 25-55 Degrees North, respectively.
 
