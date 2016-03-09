@@ -571,7 +571,7 @@ close.nc(fid)
 ## pressure value:
 #head(data$phi[144,15,24873])
 ```
-In performing PCA on the NOAA data, the pre-processing involved re-formating the data into an N x D matrix,  such that: N = days, and  D = lon x lat coordinates. Specifically, our goal was to do PCA over the USA, during the months of June and July, 2015 (to examine the floods covered in the above section). 
+In performing PCA on the NOAA data, the pre-processing involved re-formating the data into an N x D matrix,  such that: N = days, and  D = lon x lat coordinates. Specifically, our goal was to do PCA over the USA, during the months of June and July, 2015 (to examine some of the floods covered in the above section). 
 
 In this case, focusing on a specific location and timeframe was the only way to make PCA both intelligible and computationally feasible. Per the NOAA protocol, time is defined in days since 1/1/1948, so in this case, analyzing June-July 2015 corresponds with days 24624 to 24683. With regards to geography, the longitude and latitude will be bounded by: 230-300 Degrees East, and 25-55 Degrees North, respectively.
 
