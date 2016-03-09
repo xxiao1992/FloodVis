@@ -475,42 +475,43 @@ tmp_time = data$phi[tmp_xlon_range, tmp_ylat_range, (flood_begin-5):(flood_end+5
 
 
 Firstly, we will focus on changes of contours during the flood that happened in the area of Southern Michigan, central Indiana, and western Ohiothe in the US from Jun 27, 2015 to Jun 29, 2015.
-```{r, message=FALSE,warning=FALSE,echo=FALSE}
-draw_map(target, "usa", tmp_xlon, tmp_ylat, tmp_time, 1, '5 days before the flood happened')
-```
-
-This is a contour information of pressures at Jun 22, 2015. We also draw where flood happened by using read dot. At "level" bar on the right of the map, values of contour are written. For example, the area that has deep red has high pressure. We can see that pressures between each area is wide.
 
 ```{r, message=FALSE,warning=FALSE,echo=FALSE}
-draw_map(target, "usa", tmp_xlon, tmp_ylat, tmp_time, 6, 'First day of the flood')
+draw_map(target, "usa", tmp_xlon, tmp_ylat, tmp_time, 1, 'June 22nd - 5 Days Before Flood')
 ```
 
-This is a contour information of pressures at Jun 27, 2015. As we can see, pressures between each area is narrow, and there are high range of pressures in this area. Also, at the flood point, they had a value of the pressure that was around 5500.
+This is a contour map of pressures on Jun 22, 2015. We indicate where the flood happened with a red dot. Contour values are represented by the "level" bar on the right side of the map. For example, the area that has deep red has high pressure. We can see that pressures between each area is wide.
 
 ```{r, message=FALSE,warning=FALSE,echo=FALSE}
-draw_map(target, "usa", tmp_xlon, tmp_ylat, tmp_time, 7, 'Second day of the flood')
+draw_map(target, "usa", tmp_xlon, tmp_ylat, tmp_time, 6, 'June 27th - Start of Flood')
 ```
 
-This is a contour information of pressures at Jun 28, 2015. As we can see, pressures between each area is narrow as well. At the flood point, they had a value of the pressure that was around 5500.
+This is a contour map of pressures on Jun 27, 2015. As we can see, the are between each pressure band has narrowed; there is a high range of pressures in this area. Also, at the flood point, the pressure was approximately 5500.
 
 ```{r, message=FALSE,warning=FALSE,echo=FALSE}
-draw_map(target, "usa", tmp_xlon, tmp_ylat, tmp_time, 8, 'Third day of the flood')
+draw_map(target, "usa", tmp_xlon, tmp_ylat, tmp_time, 7, 'June 28th - Second Day of Flood')
 ```
 
-This is a contour information of pressures at Jun 29, 2015. Pressures between each area becomes wider. At the flood point, they had a value of the pressure that was around 5550.
+This is a contour map of pressures at Jun 28, 2015. Similar to the previous day, the pressure bands are very narrowly spaced. At the flood point, the pressure was around 5500.
 
 ```{r, message=FALSE,warning=FALSE,echo=FALSE}
-draw_map(target, "usa", tmp_xlon, tmp_ylat, tmp_time, 9, 'One day after the flood happened')
+draw_map(target, "usa", tmp_xlon, tmp_ylat, tmp_time, 8, 'June 29th - Third Day of Flood')
 ```
 
-This is a contour information of pressures at Jun 30, 2015. It seems that they had higher pressure value (around 5600) compared with data while flood was happenin.
+This is a contour information of pressures on Jun 29, 2015. Pressures between each area becomes wider. At the flood point, they had a value of the pressure that was around 5550.
+
+```{r, message=FALSE,warning=FALSE,echo=FALSE}
+draw_map(target, "usa", tmp_xlon, tmp_ylat, tmp_time, 9, 'June 30th - One Day After Flood ')
+```
+
+This is a contour map of pressures on Jun 30, 2015. It seems that there was a higher pressure value (around 5600) compared to when the flood was happening.
 
 
 ```{r, message=FALSE,warning=FALSE,echo=FALSE}
-draw_map(target, "usa", tmp_xlon, tmp_ylat, tmp_time, 10, 'Two days after the flood happened')
+draw_map(target, "usa", tmp_xlon, tmp_ylat, tmp_time, 10, 'July 1st - Two Days After Flood')
 ```
 
-This is a contour information of pressures at July 1, 2015. As same with the previous map,they had higher pressure value (around 5600) compared with data while flood was happenin.
+This is a contour map of pressures at July 1, 2015. Similar to the previous map, there was a higher pressure value (around 5600) compared to when the flood was happening.
 
 
 ```{r, message=FALSE,warning=FALSE,echo=FALSE}
@@ -532,16 +533,17 @@ tmp_xlon = xlon[tmp_xlon_range]
 tmp_ylat = ylat[tmp_ylat_range]
 tmp_time = data$phi[tmp_xlon_range, tmp_ylat_range, (flood_begin-5):(flood_end+5)]
 
-draw_map(target, "russia", tmp_xlon, tmp_ylat, tmp_time, 1, '5 days before the flood happened')
-draw_map(target, "russia", tmp_xlon, tmp_ylat, tmp_time, 6, 'The day the flood happened')
-draw_map(target, "russia", tmp_xlon, tmp_ylat, tmp_time, 7, 'The day after the flood started')
-draw_map(target, "russia", tmp_xlon, tmp_ylat, tmp_time, 8, 'The second day after the flood started')
-draw_map(target, "russia", tmp_xlon, tmp_ylat, tmp_time, 9, 'The third day after the flood started')
-draw_map(target, "russia", tmp_xlon, tmp_ylat, tmp_time, 10, 'The fourth day after the flood started')
-draw_map(target, "russia", tmp_xlon, tmp_ylat, tmp_time, 1 + flood_end + 5 - (flood_begin - 5), 'The fifth day after flood happened')
-
+draw_map(target, "russia", tmp_xlon, tmp_ylat, tmp_time, 1, 'June 20th - 5 Days Before Flood')
+draw_map(target, "russia", tmp_xlon, tmp_ylat, tmp_time, 6, 'June 25th - Start of Flood')
+draw_map(target, "russia", tmp_xlon, tmp_ylat, tmp_time, 7, 'June 26th - Second Day of Flood')
+draw_map(target, "russia", tmp_xlon, tmp_ylat, tmp_time, 8, 'June 27th - Third Day of Flood')
+draw_map(target, "russia", tmp_xlon, tmp_ylat, tmp_time, 11, 'June 30th - One Day After Flood')
+draw_map(target, "russia", tmp_xlon, tmp_ylat, tmp_time, 12, 'July 1st - Two Days After Flood')
 ```
-Despite the different latitude and longitude, the flood in USA and Russia still share some same characters. For example, on five days before the flood happen, the pressure around the flood area has been increase to the similar level to the the level when the flood happened.  Among the flood area, after the flood started, the pressure level kept decreased. Also, around the third day after the flood started, in both locations, the pressure had been significantly decreased and, by looking at the width between the contour lines around the flooded area, we can also notice that the gradient of the pressure is more pronounced. However, if we looked at the contour about the pressure level 5 days after the flood ended, we can notice that interestingly, the pressure level increased a little bit, especially in USA, the pressure level was even higher than that before the flood happened. 
+Despite the different latitude and longitude, two floods in USA and Russia share many similarities. For example, five days before each flood happened, the pressure around the flood area increased to a level similar to the levels seen during the actual flood event.  
+
+Around the flood area, once the floods began, the pressure levels decreased. Also, it is notable that around the third day after the floods started, in both locations, the pressure decreased significantly and, by looking at the width between the contour lines around the flooded area, we can also notice that the gradient of the pressure is more pronounced. However, if we look at the contour of the pressure level 5 days after the floods ended, we can notice that interestingly, the pressure level increased a little bit, especially in USA, the pressure level was even higher than that before the flood happened. 
+
 
 ```{r, message=FALSE,warning=FALSE,echo=FALSE}
 target = master_f[master_f$Register..== 4258, ]
@@ -562,16 +564,17 @@ tmp_xlon = xlon[tmp_xlon_range]
 tmp_ylat = ylat[tmp_ylat_range]
 tmp_time = data$phi[tmp_xlon_range, tmp_ylat_range, (flood_begin-5):(flood_end+5)]
 
-draw_map(target, "russia", tmp_xlon, tmp_ylat, tmp_time, 1, '5 days before the flood happened')
-draw_map(target, "russia", tmp_xlon, tmp_ylat, tmp_time, 6, 'The day the flood happened')
-draw_map(target, "russia", tmp_xlon, tmp_ylat, tmp_time, 7, 'The day after the flood started')
-draw_map(target, "russia", tmp_xlon, tmp_ylat, tmp_time, 8, 'The second day after the flood started')
-draw_map(target, "russia", tmp_xlon, tmp_ylat, tmp_time, 9, 'The third day after the flood started')
-draw_map(target, "russia", tmp_xlon, tmp_ylat, tmp_time, 10, 'The fourth day the flood started')
-draw_map(target, "russia", tmp_xlon, tmp_ylat, tmp_time, 1 + flood_end + 5 - (flood_begin - 5), 'The fifth day after flood happened')
+draw_map(target, "russia", tmp_xlon, tmp_ylat, tmp_time, 1, 'May 10th - Five Days Before Flood')
+draw_map(target, "russia", tmp_xlon, tmp_ylat, tmp_time, 6, 'May 15th - Start of Flood')
+draw_map(target, "russia", tmp_xlon, tmp_ylat, tmp_time, 7, 'May 16th - Second Day of Flood')
+draw_map(target, "russia", tmp_xlon, tmp_ylat, tmp_time, 8, 'May 17th - Third Day of Flood')
+draw_map(target, "russia", tmp_xlon, tmp_ylat, tmp_time, 24, 'June 3rd - One Day After Flood')
+draw_map(target, "russia", tmp_xlon, tmp_ylat, tmp_time, 25, 'June 4th - Two Days After Flood')
 
 ```
-The flood we compared above both last around 5 days, so we decide to look at some other flood, which last much longer to see if there is significant different changes in the pressure level. The following contours is about a 2-week flood in Russia. Compared to the previous flood in Russia we analyzed above, this long-last flood still shares some same characters. For example, on the fifth day before the flood happened, the pressure level had been very close to the peak level during the flood. The pressure kept decreased after the flood started and on the fifth day after the flood ended, the pressure level increase again. The major difference between the pressure level during these two flood is that for the longer flood, the decrease in the pressure per day is less significant, which make sense since the flood was still in the early stage and took longer to end. 
+The two floods we compared above both lasted around 5 days, so we decided to look at another flood with a much longer duration, in order to identify any significant differences in both absolute pressure level and pressure level change over time.
+
+The above set of maps covers the pressure contours over a 2-week flood in Russia. Compared to the shorter Russian flood analyzed earlier, this long-lasting flood is actually quite similar. For example, on the fifth day before the flood happened, the pressure level had been very close to the peak level during the flood. Then, the pressure level decreased once the flood started, and on the fifth day after the flood had ended, the pressure level once again increased. The major difference between the pressure level during these two flood is that for the longer flood, the decrease in the pressure per day is less significant, which makes sense since the flood was still in the early stage and took longer to end. 
 
 
 
