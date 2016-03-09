@@ -169,9 +169,9 @@ In the end, we compare the distributions between the main causes and the affecte
 ###########################
 #  Reason for Local Plots #
 ###########################
+# -- Xuyan
 
 # country_cleansing
-library(plyr)
 country = master
 country$Dead = as.numeric(country$Dead)
 country = country[!is.na(country$Dead),]
@@ -190,7 +190,7 @@ country_summary = summarize(country_group, num = n(), dead = sum(Dead))
 country_summary = as.data.frame(country_summary[order(country_summary$num,decreasing=T),])
 
 ggplot(country_summary[1:10,],aes(reorder(Country,-num),num))+geom_bar(stat = "identity",fill = "#D55E00") + 
-  ylab("Number of Floods") + xlab("Country")
+  ylab("Number of Floods") + xlab("Country") + theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=0.5))
 #List the top3 countries
 
 # heatmap of country + Severity + death
@@ -205,7 +205,7 @@ country_sev_top10 = ddply(as.data.frame(country_sev_top10), .(severity), transfo
 p = ggplot(country_sev_top10, aes(reorder(Country,-num),severity)) + 
          geom_tile(aes(fill = relativeDeath), colour = "white") 
 p + scale_fill_gradient(low = "white", high = "#D55E00")+
-  xlab("Country") + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  xlab("Country") + theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=0.5))
 
 ```
 
@@ -356,9 +356,6 @@ data = read.nc(noaa)
 
 xlon = data$X
 ylat = rev(data$Y)
-# flood data
-# master = read.csv("GlobalFloodsRecordMaster.csv", as.is = TRUE)
-# stat = read.csv("GlobalFloodsRecordAnalyses.csv", as.is = TRUE)
 
 master$Began = as.Date(master$Began,format = "%d-%b-%y")
 master$Ended = as.Date(master$Ended,format = "%d-%b-%y")
@@ -370,13 +367,9 @@ library(dplyr)
 date = data.frame(date = master_phi$Began,cnt = 1)
 group = group_by(date,date)
 summ = summarise(group,cnt = n())
-summ$date[summ$cnt == max(summ$cnt)]
 
-# found that "1998-05-20" and "2002-06-12" is the most
+# found that "2010-06-22" and "2010-07-27" is the most
 maxDates = summ$date[summ$cnt == max(summ$cnt)]
-
-
-
 
 # set transparency
 add.alpha = function(COLORS, ALPHA){
@@ -406,6 +399,7 @@ for(i in 1:length(maxDates)){
 }
 
 ```
+
 According to the plots, we can see that many floods occurred in the areas with lower pressure, detailed analysis will be illustrated below.
 
 # Pressure Distribution of Several Floods
